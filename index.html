@@ -1,0 +1,2029 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+:root {
+  --blue: #60a5fa; --blue-dark: #1d4ed8; --blue-light: #eff6ff;
+  --green: #34d399; --green-dark: #059669; --green-light: #ecfdf5;
+  --red: #f87171; --amber: #fbbf24; --purple: #a78bfa;
+  --bg: #f0f9ff; --card: #ffffff; --text: #1e293b; --muted: #94a3b8;
+  --radius: 20px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Jua','Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* 로그인 */
+#loginScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:linear-gradient(135deg,#f0f9ff,#e0f2fe,#ede9fe); }
+.login-card { background:white; border-radius:28px; padding:44px 38px; box-shadow:0 12px 48px rgba(96,165,250,0.2); max-width:440px; width:100%; text-align:center; border:2px solid #bae6fd; }
+.login-emoji { font-size:3.8rem; display:block; margin-bottom:10px; animation:floatEmoji 2.4s ease-in-out infinite; }
+@keyframes floatEmoji { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.login-title { font-size:1.7rem; color:#0369a1; margin-bottom:4px; }
+.login-sub { font-size:.92rem; color:var(--muted); margin-bottom:28px; }
+.login-form { display:flex; flex-direction:column; gap:14px; text-align:left; }
+.login-row { display:flex; gap:10px; }
+.login-label { font-size:.9rem; color:#0369a1; margin-bottom:3px; display:block; }
+.login-input { font-family:'Jua',sans-serif; width:100%; padding:12px 16px; font-size:1rem; border:2px solid #bae6fd; border-radius:14px; outline:none; color:var(--text); background:#f0f9ff; transition:border-color .2s; }
+.login-input:focus { border-color:var(--blue); background:white; }
+.login-input.err { border-color:var(--red); background:#fff1f2; }
+.login-err { font-size:.85rem; color:var(--red); display:none; }
+.login-btn { font-family:'Jua',sans-serif; width:100%; padding:14px; font-size:1.1rem; border:none; border-radius:18px; background:linear-gradient(135deg,#60a5fa,#3b82f6); color:white; cursor:pointer; box-shadow:0 4px 14px rgba(96,165,250,0.4); transition:transform .2s; }
+.login-btn:hover { transform:scale(1.02); }
+.login-notice { margin-top:18px; padding:12px 16px; background:#f0f9ff; border-radius:12px; font-size:.85rem; color:var(--muted); line-height:1.6; border:1px dashed #bae6fd; }
+
+/* 헤더 */
+.site-header { background:linear-gradient(135deg,#3b82f6,#6366f1,#8b5cf6); color:white; padding:36px 20px 28px; text-align:center; position:relative; overflow:hidden; }
+.site-header h1 { font-size:2em; position:relative; }
+.site-header p { opacity:.9; margin-top:8px; font-size:1em; }
+.header-decos { display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.header-deco { background:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.5); border-radius:20px; padding:5px 14px; font-size:.82em; }
+#studentBadge { display:none; margin-top:10px; background:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.5); border-radius:20px; padding:5px 18px; font-size:.88em; }
+
+/* 진도바 */
+.prog-wrap { background:white; padding:12px 24px; box-shadow:0 2px 12px rgba(96,165,250,0.15); position:sticky; top:0; z-index:200; display:flex; align-items:center; gap:12px; border-bottom:2px solid #bae6fd; }
+.prog-wrap span { font-size:.85em; color:var(--muted); white-space:nowrap; }
+.prog-track { flex:1; height:12px; background:#bae6fd; border-radius:10px; overflow:hidden; }
+.prog-fill { height:100%; background:linear-gradient(90deg,#60a5fa,#6366f1,#8b5cf6); border-radius:10px; transition:width .6s; width:0%; }
+#progPct { font-weight:800; color:#0369a1; min-width:36px; }
+
+/* 챕터 네비 */
+.chapter-nav { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; padding:14px 16px; background:white; border-bottom:2px solid #bae6fd; position:sticky; top:50px; z-index:190; }
+.ch-btn { padding:8px 16px; border:2px solid #bae6fd; border-radius:30px; background:white; color:var(--muted); cursor:pointer; font-family:'Jua',sans-serif; font-size:.83em; transition:all .25s; }
+.ch-btn:hover:not(.locked) { border-color:var(--blue); color:var(--blue); }
+.ch-btn.active { background:linear-gradient(135deg,#60a5fa,#6366f1); border-color:transparent; color:white; box-shadow:0 4px 14px rgba(96,165,250,0.4); }
+.ch-btn.locked { opacity:.4; cursor:not-allowed; pointer-events:none; }
+
+/* 섹션 */
+.section { display:none; animation:fadeUp .35s ease; }
+.section.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.container { max-width:900px; margin:24px auto; padding:0 16px; }
+
+/* 카드 */
+.card { background:var(--card); border-radius:var(--radius); padding:24px; margin-bottom:18px; box-shadow:0 4px 20px rgba(96,165,250,0.08); border:1.5px solid #bae6fd; }
+.card-title { font-size:1.15em; color:#0369a1; margin-bottom:16px; padding-bottom:12px; border-bottom:2px dashed #bae6fd; display:flex; align-items:center; gap:8px; }
+
+/* 하이라이트 */
+.hl { border-radius:12px; padding:14px 16px; margin:10px 0; line-height:2; }
+.hl-blue   { background:#eff6ff; border-left:4px solid #60a5fa; }
+.hl-green  { background:#ecfdf5; border-left:4px solid #34d399; }
+.hl-red    { background:#fff1f2; border-left:4px solid #f87171; }
+.hl-amber  { background:#fffbeb; border-left:4px solid #fbbf24; }
+.hl-purple { background:#f5f3ff; border-left:4px solid #a78bfa; }
+
+/* 출처 카드 (큰 버전 - 챕터 1,2용) */
+.source-card-full {
+  border-radius:18px; overflow:hidden; margin-bottom:20px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.1); border:2px solid;
+}
+.scf-header { padding:18px 20px; color:white; }
+.scf-header h3 { font-size:1.1em; margin-bottom:4px; }
+.scf-header .meta { font-size:.85em; opacity:.9; }
+.scf-body { padding:18px 20px; background:white; font-size:.92em; line-height:2; }
+.scf-body .content-box { background:#f8fafc; border-radius:12px; padding:14px; margin-top:12px; font-size:.88em; color:#475569; line-height:1.9; border:1px dashed #cbd5e1; }
+.scf-footer { padding:12px 20px; font-size:.82em; color:white; opacity:.85; }
+.scf-think { padding:14px 16px; border-radius:0 0 16px 16px; }
+
+/* 카드 색상 */
+.src-blog    { border-color:#fca5a5; }
+.src-blog    .scf-header { background:linear-gradient(135deg,#ef4444,#dc2626); }
+.src-blog    .scf-footer { background:#dc2626; }
+.src-blog    .scf-think  { background:#fff1f2; border-top:1px dashed #fca5a5; }
+
+.src-gov     { border-color:#6ee7b7; }
+.src-gov     .scf-header { background:linear-gradient(135deg,#10b981,#059669); }
+.src-gov     .scf-footer { background:#059669; }
+.src-gov     .scf-think  { background:#ecfdf5; border-top:1px dashed #6ee7b7; }
+
+.src-youtube { border-color:#fde68a; }
+.src-youtube .scf-header { background:linear-gradient(135deg,#f59e0b,#d97706); }
+.src-youtube .scf-footer { background:#d97706; }
+.src-youtube .scf-think  { background:#fffbeb; border-top:1px dashed #fde68a; }
+
+.src-hospital{ border-color:#93c5fd; }
+.src-hospital .scf-header { background:linear-gradient(135deg,#3b82f6,#2563eb); }
+.src-hospital .scf-footer { background:#2563eb; }
+.src-hospital .scf-think  { background:#eff6ff; border-top:1px dashed #93c5fd; }
+
+/* 출처 카드 (미니 버전 - 비교정리용) */
+.mini-card { border-radius:14px; overflow:hidden; border:2px solid; margin-bottom:12px; }
+.mini-header { padding:10px 14px; color:white; font-size:.88em; font-weight:bold; }
+.mini-body { padding:12px 14px; background:white; font-size:.82em; line-height:1.8; color:#475569; }
+
+/* 별점 */
+.star-rating-big { display:flex; gap:8px; justify-content:center; margin:12px 0; }
+.star-big { font-size:2.2em; cursor:pointer; transition:transform .15s; filter:grayscale(1) opacity(0.4); }
+.star-big.active { filter:none; transform:scale(1.1); }
+.star-big:hover { transform:scale(1.2); filter:none; }
+.rating-label { text-align:center; font-size:.9em; color:var(--muted); margin-bottom:8px; }
+.rating-result { text-align:center; font-size:1.1em; font-weight:bold; min-height:28px; }
+
+/* 텍스트 에어리어 */
+.discuss-box { width:100%; min-height:80px; padding:12px 16px; border:2px solid #bae6fd; border-radius:14px; font-family:'Jua',sans-serif; font-size:.93em; outline:none; resize:vertical; background:#f0f9ff; color:var(--text); transition:border-color .2s; }
+.discuss-box:focus { border-color:var(--blue); background:white; }
+
+/* 버튼 */
+.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 22px; border:none; border-radius:30px; cursor:pointer; font-family:'Jua',sans-serif; font-size:.92em; transition:all .25s; margin:4px; }
+.btn-blue  { background:linear-gradient(135deg,#60a5fa,#3b82f6); color:white; box-shadow:0 4px 14px rgba(96,165,250,0.4); }
+.btn-blue:hover { transform:translateY(-2px); }
+.btn-green { background:linear-gradient(135deg,#34d399,#059669); color:white; box-shadow:0 4px 14px rgba(52,211,153,0.3); }
+.btn-green:hover { transform:translateY(-2px); }
+.btn-ghost { background:#f0f9ff; color:#0369a1; border:1.5px solid #bae6fd; }
+.btn-ghost:hover { background:#bae6fd; }
+.btn-next  { background:linear-gradient(135deg,#6366f1,#4f46e5); color:white; box-shadow:0 4px 14px rgba(99,102,241,0.4); }
+.btn-next:hover { transform:translateY(-2px); }
+
+/* 완료 버튼 */
+.complete-btn-wrap { text-align:center; margin:20px 0 8px; }
+.complete-btn { background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; border:none; border-radius:30px; padding:14px 36px; font-family:'Jua',sans-serif; font-size:1.05em; cursor:pointer; box-shadow:0 6px 20px rgba(96,165,250,0.4); transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
+.complete-btn:hover:not(.btn-locked) { transform:translateY(-3px); }
+.complete-btn.btn-locked { background:linear-gradient(135deg,#cbd5e1,#94a3b8); box-shadow:none; cursor:not-allowed; opacity:.7; }
+
+/* 태스크 상태 */
+.task-status { background:#f0f9ff; border:1.5px dashed #bae6fd; border-radius:14px; padding:14px 18px; margin:14px 0; }
+.task-status-title { font-size:.9em; color:#0369a1; margin-bottom:10px; font-weight:bold; }
+.task-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed #bae6fd; font-size:.88em; color:var(--muted); }
+.task-item:last-child { border-bottom:none; }
+.task-item.done { color:var(--text); }
+.task-check { width:24px; height:24px; border-radius:50%; border:2px solid #bae6fd; background:white; display:flex; align-items:center; justify-content:center; font-size:.85em; flex-shrink:0; transition:all .3s; }
+.task-item.done .task-check { background:linear-gradient(135deg,#60a5fa,#6366f1); border-color:transparent; color:white; }
+
+/* 진행 단계 표시 (카드별) */
+.step-indicator { display:flex; justify-content:center; gap:6px; margin-bottom:20px; }
+.step-dot { width:36px; height:36px; border-radius:50%; border:2px solid #bae6fd; background:white; display:flex; align-items:center; justify-content:center; font-size:.82em; color:var(--muted); transition:all .3s; }
+.step-dot.current { background:linear-gradient(135deg,#60a5fa,#6366f1); border-color:transparent; color:white; transform:scale(1.1); box-shadow:0 4px 12px rgba(96,165,250,0.4); }
+.step-dot.done { background:linear-gradient(135deg,#34d399,#059669); border-color:transparent; color:white; }
+.step-connector { width:20px; height:2px; background:#bae6fd; align-self:center; }
+.step-connector.done { background:#34d399; }
+
+/* 빈칸 */
+.blank-wrap { background:#f0f9ff; border-radius:14px; padding:18px; margin:12px 0; line-height:3.2; border:1.5px dashed #bae6fd; }
+.blank { border:none; border-bottom:2.5px solid var(--blue); background:transparent; width:110px; text-align:center; font-family:'Jua',sans-serif; font-size:.95em; outline:none; padding:2px 4px; margin:0 4px; }
+.blank.ok  { border-color:#34d399; background:#ecfdf5; border-radius:8px; color:#065f46; }
+.blank.err { border-color:#f87171; background:#fff1f2; border-radius:8px; color:#991b1b; }
+
+/* 결과 박스 */
+.result-box { display:none; border-radius:14px; padding:16px; margin:10px 0; border:2px solid; }
+.result-box.show { display:block; animation:fadeUp .3s ease; }
+.result-box.good { background:#ecfdf5; border-color:#34d399; color:#065f46; }
+.result-box.info { background:#eff6ff; border-color:#60a5fa; color:#1d4ed8; }
+
+/* 퀴즈 */
+.quiz-opt { padding:12px 16px; border:2px solid #bae6fd; border-radius:12px; cursor:pointer; background:white; text-align:left; font-family:'Jua',sans-serif; font-size:.93em; transition:all .2s; margin-bottom:8px; width:100%; }
+.quiz-opt:hover:not(:disabled) { border-color:var(--blue); background:#eff6ff; }
+.quiz-opt.right { border-color:#34d399; background:#ecfdf5; color:#065f46; }
+.quiz-opt.wrong { border-color:#f87171; background:#fff1f2; color:#991b1b; }
+.exp-box { display:none; border-radius:14px; padding:16px; margin:10px 0; border:1.5px solid; }
+.exp-box.show { display:block; animation:fadeUp .3s; }
+.exp-box.ok { background:#ecfdf5; border-color:#34d399; color:#065f46; }
+.exp-box.ng { background:#fff1f2; border-color:#f87171; color:#991b1b; }
+
+/* 비교 테이블 */
+.compare-wrap { overflow-x:auto; margin:12px 0; }
+.compare-tbl { width:100%; border-collapse:collapse; font-size:.88em; }
+.compare-tbl th { background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; padding:10px 12px; text-align:center; }
+.compare-tbl td { padding:10px 12px; border:1.5px solid #bae6fd; text-align:center; }
+.compare-tbl tr:nth-child(even) td { background:#f0f9ff; }
+.compare-tbl .good { color:#059669; font-weight:bold; }
+.compare-tbl .bad  { color:#dc2626; font-weight:bold; }
+
+/* 기준 선택 */
+.criteria-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin:14px 0; }
+.criteria-item { border:2px solid #bae6fd; border-radius:14px; padding:14px; background:white; cursor:pointer; transition:all .25s; }
+.criteria-item:hover { border-color:var(--blue); }
+.criteria-item.checked { border-color:#34d399; background:#ecfdf5; }
+.criteria-icon { font-size:1.6em; margin-bottom:6px; }
+.criteria-text { font-size:.85em; line-height:1.6; }
+
+/* 축하 오버레이 */
+.congrats-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
+.congrats-overlay.show { display:flex; }
+.congrats-box { background:white; border-radius:24px; padding:40px; text-align:center; max-width:360px; width:90%; animation:popIn .4s cubic-bezier(.175,.885,.32,1.275); border:3px solid #bae6fd; }
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.congrats-box h2 { font-size:1.6em; color:#0369a1; margin-bottom:8px; }
+.congrats-box p { color:var(--muted); margin-bottom:18px; line-height:1.7; }
+
+/* 토스트 */
+.toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:linear-gradient(135deg,#1d4ed8,#5b21b6); color:white; padding:14px 28px; border-radius:30px; font-family:'Jua',sans-serif; font-size:.95em; z-index:2000; opacity:0; transition:all .35s; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* 제출 */
+.submit-card { max-width:900px; margin:0 auto 40px; padding:0 16px; }
+.submit-inner { background:white; border-radius:var(--radius); padding:24px; box-shadow:0 4px 20px rgba(96,165,250,0.08); border:1.5px solid #bae6fd; }
+.submit-info-box { background:#f0f9ff; border-radius:12px; padding:14px 18px; margin-bottom:16px; font-size:.9rem; line-height:2.4; border:1.5px solid #bae6fd; }
+.submit-btn-main { font-family:'Jua',sans-serif; display:block; width:100%; padding:15px; font-size:1.1rem; border:none; border-radius:18px; background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; cursor:pointer; box-shadow:0 4px 16px rgba(96,165,250,0.4); transition:transform .2s; }
+.submit-btn-main:hover:not(:disabled) { transform:scale(1.02); }
+.submit-btn-main:disabled { opacity:.5; cursor:not-allowed; }
+.submit-done-box { display:none; text-align:center; padding:24px; background:#ecfdf5; border-radius:16px; margin-top:14px; border:1.5px solid #34d399; }
+
+/* 플로우 */
+.flow { display:flex; flex-direction:column; align-items:center; }
+.flow-box { padding:12px 26px; border-radius:14px; color:white; text-align:center; width:260px; margin:3px 0; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+.flow-arrow { color:#60a5fa; font-size:1.6em; }
+
+/* 푸터 */
+.site-footer { text-align:center; padding:28px 20px; color:var(--muted); font-size:.88em; border-top:2px dashed #bae6fd; margin-top:40px; background:white; }
+.made-by { display:inline-block; background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; padding:8px 26px; border-radius:30px; margin-top:10px; }
+
+@media(max-width:600px){
+  .site-header h1{font-size:1.5em}
+  .ch-btn{font-size:.76em;padding:6px 10px}
+  .criteria-grid{grid-template-columns:1fr 1fr}
+  .flow-box{width:200px}
+}
+
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 정보 리터러시 학습 1단계</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #60a5fa; --blue-dark: #1d4ed8; --blue-light: #eff6ff;
+  --green: #34d399; --green-dark: #059669; --green-light: #ecfdf5;
+  --red: #f87171; --amber: #fbbf24; --purple: #a78bfa;
+  --bg: #f0f9ff; --card: #ffffff; --text: #1e293b; --muted: #94a3b8;
+  --radius: 20px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Jua','Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* 로그인 */
+#loginScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:linear-gradient(135deg,#f0f9ff,#e0f2fe,#ede9fe); }
+.login-card { background:white; border-radius:28px; padding:44px 38px; box-shadow:0 12px 48px rgba(96,165,250,0.2); max-width:440px; width:100%; text-align:center; border:2px solid #bae6fd; }
+.login-emoji { font-size:3.8rem; display:block; margin-bottom:10px; animation:floatEmoji 2.4s ease-in-out infinite; }
+@keyframes floatEmoji { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.login-title { font-size:1.7rem; color:#0369a1; margin-bottom:4px; }
+.login-sub { font-size:.92rem; color:var(--muted); margin-bottom:28px; }
+.login-form { display:flex; flex-direction:column; gap:14px; text-align:left; }
+.login-row { display:flex; gap:10px; }
+.login-label { font-size:.9rem; color:#0369a1; margin-bottom:3px; display:block; }
+.login-input { font-family:'Jua',sans-serif; width:100%; padding:12px 16px; font-size:1rem; border:2px solid #bae6fd; border-radius:14px; outline:none; color:var(--text); background:#f0f9ff; transition:border-color .2s; }
+.login-input:focus { border-color:var(--blue); background:white; }
+.login-input.err { border-color:var(--red); background:#fff1f2; }
+.login-err { font-size:.85rem; color:var(--red); display:none; }
+.login-btn { font-family:'Jua',sans-serif; width:100%; padding:14px; font-size:1.1rem; border:none; border-radius:18px; background:linear-gradient(135deg,#60a5fa,#3b82f6); color:white; cursor:pointer; box-shadow:0 4px 14px rgba(96,165,250,0.4); transition:transform .2s; }
+.login-btn:hover { transform:scale(1.02); }
+.login-notice { margin-top:18px; padding:12px 16px; background:#f0f9ff; border-radius:12px; font-size:.85rem; color:var(--muted); line-height:1.6; border:1px dashed #bae6fd; }
+
+/* 헤더 */
+.site-header { background:linear-gradient(135deg,#3b82f6,#6366f1,#8b5cf6); color:white; padding:36px 20px 28px; text-align:center; position:relative; overflow:hidden; }
+.site-header h1 { font-size:2em; position:relative; }
+.site-header p { opacity:.9; margin-top:8px; font-size:1em; }
+.header-decos { display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.header-deco { background:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.5); border-radius:20px; padding:5px 14px; font-size:.82em; }
+#studentBadge { display:none; margin-top:10px; background:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.5); border-radius:20px; padding:5px 18px; font-size:.88em; }
+
+/* 진도바 */
+.prog-wrap { background:white; padding:12px 24px; box-shadow:0 2px 12px rgba(96,165,250,0.15); position:sticky; top:0; z-index:200; display:flex; align-items:center; gap:12px; border-bottom:2px solid #bae6fd; }
+.prog-wrap span { font-size:.85em; color:var(--muted); white-space:nowrap; }
+.prog-track { flex:1; height:12px; background:#bae6fd; border-radius:10px; overflow:hidden; }
+.prog-fill { height:100%; background:linear-gradient(90deg,#60a5fa,#6366f1,#8b5cf6); border-radius:10px; transition:width .6s; width:0%; }
+#progPct { font-weight:800; color:#0369a1; min-width:36px; }
+
+/* 챕터 네비 */
+.chapter-nav { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; padding:14px 16px; background:white; border-bottom:2px solid #bae6fd; position:sticky; top:50px; z-index:190; }
+.ch-btn { padding:8px 16px; border:2px solid #bae6fd; border-radius:30px; background:white; color:var(--muted); cursor:pointer; font-family:'Jua',sans-serif; font-size:.83em; transition:all .25s; }
+.ch-btn:hover:not(.locked) { border-color:var(--blue); color:var(--blue); }
+.ch-btn.active { background:linear-gradient(135deg,#60a5fa,#6366f1); border-color:transparent; color:white; box-shadow:0 4px 14px rgba(96,165,250,0.4); }
+.ch-btn.locked { opacity:.4; cursor:not-allowed; pointer-events:none; }
+
+/* 섹션 */
+.section { display:none; animation:fadeUp .35s ease; }
+.section.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.container { max-width:900px; margin:24px auto; padding:0 16px; }
+
+/* 카드 */
+.card { background:var(--card); border-radius:var(--radius); padding:24px; margin-bottom:18px; box-shadow:0 4px 20px rgba(96,165,250,0.08); border:1.5px solid #bae6fd; }
+.card-title { font-size:1.15em; color:#0369a1; margin-bottom:16px; padding-bottom:12px; border-bottom:2px dashed #bae6fd; display:flex; align-items:center; gap:8px; }
+
+/* 하이라이트 */
+.hl { border-radius:12px; padding:14px 16px; margin:10px 0; line-height:2; }
+.hl-blue   { background:#eff6ff; border-left:4px solid #60a5fa; }
+.hl-green  { background:#ecfdf5; border-left:4px solid #34d399; }
+.hl-red    { background:#fff1f2; border-left:4px solid #f87171; }
+.hl-amber  { background:#fffbeb; border-left:4px solid #fbbf24; }
+.hl-purple { background:#f5f3ff; border-left:4px solid #a78bfa; }
+
+/* 출처 카드 (큰 버전 - 챕터 1,2용) */
+.source-card-full {
+  border-radius:18px; overflow:hidden; margin-bottom:20px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.1); border:2px solid;
+}
+.scf-header { padding:18px 20px; color:white; }
+.scf-header h3 { font-size:1.1em; margin-bottom:4px; }
+.scf-header .meta { font-size:.85em; opacity:.9; }
+.scf-body { padding:18px 20px; background:white; font-size:.92em; line-height:2; }
+.scf-body .content-box { background:#f8fafc; border-radius:12px; padding:14px; margin-top:12px; font-size:.88em; color:#475569; line-height:1.9; border:1px dashed #cbd5e1; }
+.scf-footer { padding:12px 20px; font-size:.82em; color:white; opacity:.85; }
+.scf-think { padding:14px 16px; border-radius:0 0 16px 16px; }
+
+/* 카드 색상 */
+.src-blog    { border-color:#fca5a5; }
+.src-blog    .scf-header { background:linear-gradient(135deg,#ef4444,#dc2626); }
+.src-blog    .scf-footer { background:#dc2626; }
+.src-blog    .scf-think  { background:#fff1f2; border-top:1px dashed #fca5a5; }
+
+.src-gov     { border-color:#6ee7b7; }
+.src-gov     .scf-header { background:linear-gradient(135deg,#10b981,#059669); }
+.src-gov     .scf-footer { background:#059669; }
+.src-gov     .scf-think  { background:#ecfdf5; border-top:1px dashed #6ee7b7; }
+
+.src-youtube { border-color:#fde68a; }
+.src-youtube .scf-header { background:linear-gradient(135deg,#f59e0b,#d97706); }
+.src-youtube .scf-footer { background:#d97706; }
+.src-youtube .scf-think  { background:#fffbeb; border-top:1px dashed #fde68a; }
+
+.src-hospital{ border-color:#93c5fd; }
+.src-hospital .scf-header { background:linear-gradient(135deg,#3b82f6,#2563eb); }
+.src-hospital .scf-footer { background:#2563eb; }
+.src-hospital .scf-think  { background:#eff6ff; border-top:1px dashed #93c5fd; }
+
+/* 출처 카드 (미니 버전 - 비교정리용) */
+.mini-card { border-radius:14px; overflow:hidden; border:2px solid; margin-bottom:12px; }
+.mini-header { padding:10px 14px; color:white; font-size:.88em; font-weight:bold; }
+.mini-body { padding:12px 14px; background:white; font-size:.82em; line-height:1.8; color:#475569; }
+
+/* 별점 */
+.star-rating-big { display:flex; gap:8px; justify-content:center; margin:12px 0; }
+.star-big { font-size:2.2em; cursor:pointer; transition:transform .15s; filter:grayscale(1) opacity(0.4); }
+.star-big.active { filter:none; transform:scale(1.1); }
+.star-big:hover { transform:scale(1.2); filter:none; }
+.rating-label { text-align:center; font-size:.9em; color:var(--muted); margin-bottom:8px; }
+.rating-result { text-align:center; font-size:1.1em; font-weight:bold; min-height:28px; }
+
+/* 텍스트 에어리어 */
+.discuss-box { width:100%; min-height:80px; padding:12px 16px; border:2px solid #bae6fd; border-radius:14px; font-family:'Jua',sans-serif; font-size:.93em; outline:none; resize:vertical; background:#f0f9ff; color:var(--text); transition:border-color .2s; }
+.discuss-box:focus { border-color:var(--blue); background:white; }
+
+/* 버튼 */
+.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 22px; border:none; border-radius:30px; cursor:pointer; font-family:'Jua',sans-serif; font-size:.92em; transition:all .25s; margin:4px; }
+.btn-blue  { background:linear-gradient(135deg,#60a5fa,#3b82f6); color:white; box-shadow:0 4px 14px rgba(96,165,250,0.4); }
+.btn-blue:hover { transform:translateY(-2px); }
+.btn-green { background:linear-gradient(135deg,#34d399,#059669); color:white; box-shadow:0 4px 14px rgba(52,211,153,0.3); }
+.btn-green:hover { transform:translateY(-2px); }
+.btn-ghost { background:#f0f9ff; color:#0369a1; border:1.5px solid #bae6fd; }
+.btn-ghost:hover { background:#bae6fd; }
+.btn-next  { background:linear-gradient(135deg,#6366f1,#4f46e5); color:white; box-shadow:0 4px 14px rgba(99,102,241,0.4); }
+.btn-next:hover { transform:translateY(-2px); }
+
+/* 완료 버튼 */
+.complete-btn-wrap { text-align:center; margin:20px 0 8px; }
+.complete-btn { background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; border:none; border-radius:30px; padding:14px 36px; font-family:'Jua',sans-serif; font-size:1.05em; cursor:pointer; box-shadow:0 6px 20px rgba(96,165,250,0.4); transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
+.complete-btn:hover:not(.btn-locked) { transform:translateY(-3px); }
+.complete-btn.btn-locked { background:linear-gradient(135deg,#cbd5e1,#94a3b8); box-shadow:none; cursor:not-allowed; opacity:.7; }
+
+/* 태스크 상태 */
+.task-status { background:#f0f9ff; border:1.5px dashed #bae6fd; border-radius:14px; padding:14px 18px; margin:14px 0; }
+.task-status-title { font-size:.9em; color:#0369a1; margin-bottom:10px; font-weight:bold; }
+.task-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed #bae6fd; font-size:.88em; color:var(--muted); }
+.task-item:last-child { border-bottom:none; }
+.task-item.done { color:var(--text); }
+.task-check { width:24px; height:24px; border-radius:50%; border:2px solid #bae6fd; background:white; display:flex; align-items:center; justify-content:center; font-size:.85em; flex-shrink:0; transition:all .3s; }
+.task-item.done .task-check { background:linear-gradient(135deg,#60a5fa,#6366f1); border-color:transparent; color:white; }
+
+/* 진행 단계 표시 (카드별) */
+.step-indicator { display:flex; justify-content:center; gap:6px; margin-bottom:20px; }
+.step-dot { width:36px; height:36px; border-radius:50%; border:2px solid #bae6fd; background:white; display:flex; align-items:center; justify-content:center; font-size:.82em; color:var(--muted); transition:all .3s; }
+.step-dot.current { background:linear-gradient(135deg,#60a5fa,#6366f1); border-color:transparent; color:white; transform:scale(1.1); box-shadow:0 4px 12px rgba(96,165,250,0.4); }
+.step-dot.done { background:linear-gradient(135deg,#34d399,#059669); border-color:transparent; color:white; }
+.step-connector { width:20px; height:2px; background:#bae6fd; align-self:center; }
+.step-connector.done { background:#34d399; }
+
+/* 빈칸 */
+.blank-wrap { background:#f0f9ff; border-radius:14px; padding:18px; margin:12px 0; line-height:3.2; border:1.5px dashed #bae6fd; }
+.blank { border:none; border-bottom:2.5px solid var(--blue); background:transparent; width:110px; text-align:center; font-family:'Jua',sans-serif; font-size:.95em; outline:none; padding:2px 4px; margin:0 4px; }
+.blank.ok  { border-color:#34d399; background:#ecfdf5; border-radius:8px; color:#065f46; }
+.blank.err { border-color:#f87171; background:#fff1f2; border-radius:8px; color:#991b1b; }
+
+/* 결과 박스 */
+.result-box { display:none; border-radius:14px; padding:16px; margin:10px 0; border:2px solid; }
+.result-box.show { display:block; animation:fadeUp .3s ease; }
+.result-box.good { background:#ecfdf5; border-color:#34d399; color:#065f46; }
+.result-box.info { background:#eff6ff; border-color:#60a5fa; color:#1d4ed8; }
+
+/* 퀴즈 */
+.quiz-opt { padding:12px 16px; border:2px solid #bae6fd; border-radius:12px; cursor:pointer; background:white; text-align:left; font-family:'Jua',sans-serif; font-size:.93em; transition:all .2s; margin-bottom:8px; width:100%; }
+.quiz-opt:hover:not(:disabled) { border-color:var(--blue); background:#eff6ff; }
+.quiz-opt.right { border-color:#34d399; background:#ecfdf5; color:#065f46; }
+.quiz-opt.wrong { border-color:#f87171; background:#fff1f2; color:#991b1b; }
+.exp-box { display:none; border-radius:14px; padding:16px; margin:10px 0; border:1.5px solid; }
+.exp-box.show { display:block; animation:fadeUp .3s; }
+.exp-box.ok { background:#ecfdf5; border-color:#34d399; color:#065f46; }
+.exp-box.ng { background:#fff1f2; border-color:#f87171; color:#991b1b; }
+
+/* 비교 테이블 */
+.compare-wrap { overflow-x:auto; margin:12px 0; }
+.compare-tbl { width:100%; border-collapse:collapse; font-size:.88em; }
+.compare-tbl th { background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; padding:10px 12px; text-align:center; }
+.compare-tbl td { padding:10px 12px; border:1.5px solid #bae6fd; text-align:center; }
+.compare-tbl tr:nth-child(even) td { background:#f0f9ff; }
+.compare-tbl .good { color:#059669; font-weight:bold; }
+.compare-tbl .bad  { color:#dc2626; font-weight:bold; }
+
+/* 기준 선택 */
+.criteria-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin:14px 0; }
+.criteria-item { border:2px solid #bae6fd; border-radius:14px; padding:14px; background:white; cursor:pointer; transition:all .25s; }
+.criteria-item:hover { border-color:var(--blue); }
+.criteria-item.checked { border-color:#34d399; background:#ecfdf5; }
+.criteria-icon { font-size:1.6em; margin-bottom:6px; }
+.criteria-text { font-size:.85em; line-height:1.6; }
+
+/* 축하 오버레이 */
+.congrats-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
+.congrats-overlay.show { display:flex; }
+.congrats-box { background:white; border-radius:24px; padding:40px; text-align:center; max-width:360px; width:90%; animation:popIn .4s cubic-bezier(.175,.885,.32,1.275); border:3px solid #bae6fd; }
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.congrats-box h2 { font-size:1.6em; color:#0369a1; margin-bottom:8px; }
+.congrats-box p { color:var(--muted); margin-bottom:18px; line-height:1.7; }
+
+/* 토스트 */
+.toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:linear-gradient(135deg,#1d4ed8,#5b21b6); color:white; padding:14px 28px; border-radius:30px; font-family:'Jua',sans-serif; font-size:.95em; z-index:2000; opacity:0; transition:all .35s; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* 제출 */
+.submit-card { max-width:900px; margin:0 auto 40px; padding:0 16px; }
+.submit-inner { background:white; border-radius:var(--radius); padding:24px; box-shadow:0 4px 20px rgba(96,165,250,0.08); border:1.5px solid #bae6fd; }
+.submit-info-box { background:#f0f9ff; border-radius:12px; padding:14px 18px; margin-bottom:16px; font-size:.9rem; line-height:2.4; border:1.5px solid #bae6fd; }
+.submit-btn-main { font-family:'Jua',sans-serif; display:block; width:100%; padding:15px; font-size:1.1rem; border:none; border-radius:18px; background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; cursor:pointer; box-shadow:0 4px 16px rgba(96,165,250,0.4); transition:transform .2s; }
+.submit-btn-main:hover:not(:disabled) { transform:scale(1.02); }
+.submit-btn-main:disabled { opacity:.5; cursor:not-allowed; }
+.submit-done-box { display:none; text-align:center; padding:24px; background:#ecfdf5; border-radius:16px; margin-top:14px; border:1.5px solid #34d399; }
+
+/* 플로우 */
+.flow { display:flex; flex-direction:column; align-items:center; }
+.flow-box { padding:12px 26px; border-radius:14px; color:white; text-align:center; width:260px; margin:3px 0; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+.flow-arrow { color:#60a5fa; font-size:1.6em; }
+
+/* 푸터 */
+.site-footer { text-align:center; padding:28px 20px; color:var(--muted); font-size:.88em; border-top:2px dashed #bae6fd; margin-top:40px; background:white; }
+.made-by { display:inline-block; background:linear-gradient(135deg,#60a5fa,#6366f1); color:white; padding:8px 26px; border-radius:30px; margin-top:10px; }
+
+@media(max-width:600px){
+  .site-header h1{font-size:1.5em}
+  .ch-btn{font-size:.76em;padding:6px 10px}
+  .criteria-grid{grid-template-columns:1fr 1fr}
+  .flow-box{width:200px}
+}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="loginScreen">
+  <div class="login-card">
+    <span class="login-emoji">🔍</span>
+    <div class="login-title">정보 리터러시 학습</div>
+    <div class="login-sub">1단계 · 이 정보, 믿을 수 있을까? 🧐</div>
+    <div class="login-form">
+      <div class="login-row">
+        <div style="flex:1;"><label class="login-label">반 *</label><input class="login-input" id="inp-class" type="number" min="1" max="20" placeholder="예) 3"></div>
+        <div style="flex:1;"><label class="login-label">번호 *</label><input class="login-input" id="inp-num" type="number" min="1" max="40" placeholder="예) 15"></div>
+      </div>
+      <div><label class="login-label">이름 *</label><input class="login-input" id="inp-name" type="text" placeholder="이름을 입력하세요" maxlength="8"></div>
+      <div class="login-err" id="loginErr">⚠️ 반, 번호, 이름을 모두 입력해주세요!</div>
+      <button class="login-btn" onclick="doLogin()">🔍 학습 시작하기</button>
+    </div>
+    <div class="login-notice">💡 입력한 정보는 학습 결과 제출 시 선생님께 전달됩니다.</div>
+  </div>
+</div>
+
+<!-- 메인 앱 -->
+<div id="mainApp" style="display:none;">
+<div class="toast" id="lockToast"></div>
+
+<header class="site-header">
+  <h1>🔍✨ 이 정보, 믿을 수 있을까?</h1>
+  <p>정보 리터러시 학습 1단계 · ATL 기능 기르기</p>
+  <div class="header-decos">
+    <span class="header-deco">🃏 출처 카드 비교</span>
+    <span class="header-deco">⭐ 신뢰도 평가</span>
+    <span class="header-deco">🗣️ 토의</span>
+    <span class="header-deco">✅ 기준 세우기</span>
+  </div>
+  <div id="studentBadge"></div>
+</header>
+
+<div class="prog-wrap">
+  <span>🔍 진도</span>
+  <div class="prog-track"><div class="prog-fill" id="pFill"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<nav class="chapter-nav">
+  <button class="ch-btn active"  id="ch-btn-0" onclick="goChapter(0)">🌟 시작</button>
+  <button class="ch-btn locked"  id="ch-btn-1" onclick="goChapter(1)">🔒 🃏 카드&평가</button>
+  <button class="ch-btn locked"  id="ch-btn-2" onclick="goChapter(2)">🔒 🗣️ 토의</button>
+  <button class="ch-btn locked"  id="ch-btn-3" onclick="goChapter(3)">🔒 📊 비교정리</button>
+  <button class="ch-btn locked"  id="ch-btn-4" onclick="goChapter(4)">🔒 ✅ 기준세우기</button>
+  <button class="ch-btn locked"  id="ch-btn-5" onclick="goChapter(5)">🔒 ✏️ 확인문제</button>
+  <button class="ch-btn locked"  id="ch-btn-6" onclick="goChapter(6)">🔒 🎯 마무리</button>
+</nav>
+
+<div class="container">
+
+<!-- ══ 0. 시작 ══ -->
+<div class="section active" id="tab-0">
+  <div class="card">
+    <div class="card-title">🌟 오늘의 학습 목표</div>
+    <div class="hl hl-blue">
+      <p>📌 출처에 따라 정보의 신뢰성이 다름을 이해한다.</p>
+      <p>📌 신뢰할 수 있는 출처의 기준을 스스로 세울 수 있다.</p>
+      <p>📌 정보를 비판적으로 읽는 습관을 기른다.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">💭 생각해보기</div>
+    <div class="hl hl-amber">
+      <p>❓ 여러분은 건강 정보가 궁금할 때 어디서 찾나요?<br>그 정보가 항상 맞다고 생각하나요?</p>
+    </div>
+    <button class="btn btn-blue" onclick="toggleEl('hint0'); markTask(0,'think')">💡 생각해보고 클릭하기</button>
+    <div id="hint0" style="display:none;" class="hl hl-green">
+      <p>✅ 같은 주제라도 <strong>누가, 어디서</strong> 작성했느냐에 따라 정보의 정확성이 크게 달라요!<br>오늘은 그 차이를 직접 비교해봐요 🔍</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🗺️ 오늘의 학습 흐름</div>
+    <div class="flow">
+      <div class="flow-box" style="background:linear-gradient(135deg,#ef4444,#dc2626)">🃏 카드 A 읽기 → ⭐ 신뢰도 평가</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box" style="background:linear-gradient(135deg,#10b981,#059669)">🃏 카드 B 읽기 → ⭐ 신뢰도 평가</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box" style="background:linear-gradient(135deg,#f59e0b,#d97706)">🃏 카드 C 읽기 → ⭐ 신뢰도 평가</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box" style="background:linear-gradient(135deg,#3b82f6,#2563eb)">🃏 카드 D 읽기 → ⭐ 신뢰도 평가</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">🗣️ 토의 → 📊 비교 → ✅ 기준</div>
+    </div>
+  </div>
+  <div class="task-status">
+    <div class="task-status-title">📋 완료해야 다음으로!</div>
+    <div class="task-item" id="task-0-think"><div class="task-check">1</div> 💡 생각해보기 버튼 클릭</div>
+  </div>
+  <div class="complete-btn-wrap">
+    <button class="complete-btn btn-locked" id="complete-btn-0" onclick="tryComplete(0)">시작하기 🔍 →</button>
+  </div>
+</div>
+
+<!-- ══ 1. 카드 읽기 + 신뢰도 평가 (A→B→C→D 순서) ══ -->
+<div class="section" id="tab-1">
+
+  <!-- 진행 단계 표시 -->
+  <div class="card" style="padding:16px;">
+    <div style="text-align:center;font-size:.9em;color:#0369a1;margin-bottom:10px;">📍 현재 진행 단계</div>
+    <div class="step-indicator">
+      <div class="step-dot current" id="dot-A">A</div>
+      <div class="step-connector" id="con-AB"></div>
+      <div class="step-dot" id="dot-B">B</div>
+      <div class="step-connector" id="con-BC"></div>
+      <div class="step-dot" id="dot-C">C</div>
+      <div class="step-connector" id="con-CD"></div>
+      <div class="step-dot" id="dot-D">D</div>
+    </div>
+    <div style="text-align:center;font-size:.88em;color:var(--muted);" id="step-label">카드 A 읽고 신뢰도 평가하기</div>
+  </div>
+
+  <!-- 카드 A -->
+  <div id="section-cardA">
+    <div class="card">
+      <div class="card-title">🃏 카드 A 읽기</div>
+      <div class="source-card-full src-blog">
+        <div class="scf-header">
+          <h3>💻 개인 블로그 포스팅</h3>
+          <div class="meta">📍 네이버 블로그 &nbsp;|&nbsp; 📅 2024.03.15</div>
+        </div>
+        <div class="scf-body">
+          <div style="font-size:1em;font-weight:bold;color:#1e293b;margin-bottom:8px;">고혈압에 좋은 음식 BEST 5!!</div>
+          <div style="font-size:.88em;color:#64748b;">작성자: <strong>건강마니아_홍길동</strong> (일반인)</div>
+          <div class="content-box">
+            "안녕하세요~ 오늘은 제가 고혈압 진단을 받고 <strong>직접 먹어보고 효과 본</strong> 음식들을 알려드릴게요!<br><br>
+            1. 바나나 🍌 — 칼륨이 많아서 혈압에 좋다고 하더라고요. 매일 1개씩 먹었더니 <strong>진짜 좋아진 것 같아요!</strong><br><br>
+            2. 당근 🥕 — <strong>어디서 봤는데</strong> 혈압에 좋다고 해서 먹기 시작했어요.<br><br>
+            ※ 이 글은 <strong>개인적인 경험</strong>을 바탕으로 작성되었습니다."
+          </div>
+          <div class="hl hl-red" style="margin-top:12px;">
+            <p>🔍 <strong>주목해봐요!</strong></p>
+            <p>→ "~한 것 같아요", "어디서 봤는데" — 이런 표현이 보이나요?</p>
+            <p>→ 근거(통계, 연구)가 제시되어 있나요?</p>
+            <p>→ 작성자는 전문가인가요?</p>
+          </div>
+        </div>
+        <div class="scf-footer">출처: 네이버 블로그 (개인 작성)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⭐ 카드 A 신뢰도 평가하기</div>
+      <div class="hl hl-blue"><p>💡 방금 읽은 카드 A를 얼마나 신뢰할 수 있을지 별점으로 평가해봐요!</p></div>
+      <div class="rating-label">카드 A (개인 블로그)의 신뢰도는?</div>
+      <div class="star-rating-big" id="stars-A">
+        <span class="star-big" onclick="rateSrc('A',1)" title="1점">⭐</span>
+        <span class="star-big" onclick="rateSrc('A',2)" title="2점">⭐</span>
+        <span class="star-big" onclick="rateSrc('A',3)" title="3점">⭐</span>
+        <span class="star-big" onclick="rateSrc('A',4)" title="4점">⭐</span>
+        <span class="star-big" onclick="rateSrc('A',5)" title="5점">⭐</span>
+      </div>
+      <div class="rating-result" id="rating-result-A"></div>
+      <div style="margin-top:14px;">
+        <label style="font-size:.9em;color:#0369a1;font-weight:bold;">📝 이 카드에서 이상하거나 부족하다고 느낀 점을 써봐요:</label>
+        <textarea class="discuss-box" id="note-A" placeholder="예) 작성자가 전문가가 아닌 것 같고, '~한 것 같아요'처럼 불확실한 표현이 많아서 믿기 어려워요..." style="margin-top:8px;" oninput="checkNoteA()"></textarea>
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <button class="btn btn-next" id="btn-next-A" style="opacity:.5;cursor:not-allowed;" onclick="goNextCard('B')">카드 B 보러 가기 →</button>
+      </div>
+      <div class="hl hl-amber" id="hint-next-A" style="margin-top:10px;">
+        <p>💡 별점을 매기고 메모를 쓰면 다음 카드로 넘어갈 수 있어요!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드 B -->
+  <div id="section-cardB" style="display:none;">
+    <div class="card">
+      <div class="card-title">🃏 카드 B 읽기</div>
+      <div class="source-card-full src-gov">
+        <div class="scf-header">
+          <h3>🏛️ 공공기관 공식 홈페이지</h3>
+          <div class="meta">📍 국가건강정보포털 (health.kdca.go.kr) &nbsp;|&nbsp; 📅 2023.11.01 최종수정</div>
+        </div>
+        <div class="scf-body">
+          <div style="font-size:1em;font-weight:bold;color:#1e293b;margin-bottom:8px;">고혈압이란?</div>
+          <div style="font-size:.88em;color:#64748b;">작성자: <strong>질병관리청</strong> (정부 공공기관)</div>
+          <div class="content-box">
+            "고혈압은 수축기 혈압이 <strong>140mmHg 이상</strong>이거나 이완기 혈압이 <strong>90mmHg 이상</strong>인 상태를 말합니다.<br><br>
+            우리나라 성인의 약 <strong>29%</strong>가 고혈압을 가지고 있으며, 심뇌혈관질환의 주요 위험 요인입니다.<br>
+            <em style="color:#059669;">(출처: 2023 국민건강통계)</em><br><br>
+            ※ 본 정보는 <strong>대한고혈압학회의 진료 지침</strong>을 근거로 작성되었습니다."
+          </div>
+          <div class="hl hl-green" style="margin-top:12px;">
+            <p>🔍 <strong>주목해봐요!</strong></p>
+            <p>→ 수치(140mmHg, 29%)와 출처(2023 국민건강통계)가 있나요?</p>
+            <p>→ 작성자가 어떤 기관인가요?</p>
+            <p>→ 카드 A와 어떤 점이 다른가요?</p>
+          </div>
+        </div>
+        <div class="scf-footer">출처: 질병관리청 국가건강정보포털</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⭐ 카드 B 신뢰도 평가하기</div>
+      <div class="hl hl-blue"><p>💡 카드 B는 카드 A와 어떻게 다른가요? 신뢰도를 평가해봐요!</p></div>
+      <div class="rating-label">카드 B (공공기관)의 신뢰도는?</div>
+      <div class="star-rating-big" id="stars-B">
+        <span class="star-big" onclick="rateSrc('B',1)">⭐</span>
+        <span class="star-big" onclick="rateSrc('B',2)">⭐</span>
+        <span class="star-big" onclick="rateSrc('B',3)">⭐</span>
+        <span class="star-big" onclick="rateSrc('B',4)">⭐</span>
+        <span class="star-big" onclick="rateSrc('B',5)">⭐</span>
+      </div>
+      <div class="rating-result" id="rating-result-B"></div>
+      <div style="margin-top:14px;">
+        <label style="font-size:.9em;color:#0369a1;font-weight:bold;">📝 이 카드에서 신뢰할 수 있다고 느낀 점을 써봐요:</label>
+        <textarea class="discuss-box" id="note-B" placeholder="예) 기관 이름과 날짜가 명확하고, 통계 출처도 있어서 믿을 수 있을 것 같아요..." style="margin-top:8px;" oninput="checkNoteB()"></textarea>
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <button class="btn btn-next" id="btn-next-B" style="opacity:.5;cursor:not-allowed;" onclick="goNextCard('C')">카드 C 보러 가기 →</button>
+      </div>
+      <div class="hl hl-amber" id="hint-next-B" style="margin-top:10px;">
+        <p>💡 별점을 매기고 메모를 쓰면 다음 카드로 넘어갈 수 있어요!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드 C -->
+  <div id="section-cardC" style="display:none;">
+    <div class="card">
+      <div class="card-title">🃏 카드 C 읽기</div>
+      <div class="source-card-full src-youtube">
+        <div class="scf-header">
+          <h3>📱 유튜브 쇼츠 영상</h3>
+          <div class="meta">채널: 건강TV_shorts &nbsp;|&nbsp; 📅 2024.01.20 &nbsp;|&nbsp; 👥 구독자 12만명</div>
+        </div>
+        <div class="scf-body">
+          <div style="font-size:1em;font-weight:bold;color:#1e293b;margin-bottom:8px;">고혈압 낫는 법 (30초 요약) 🔥</div>
+          <div style="font-size:.88em;color:#64748b;">채널 운영자: <strong>불명확</strong> (전문 자격 없음)</div>
+          <div class="content-box">
+            "고혈압? 사실 <strong>이거 하나만 하면 돼요!</strong>"<br><br>
+            → 매일 아침 레몬물 마시기<br>
+            → 소금 줄이기<br>
+            → 스트레스 받지 않기<br><br>
+            "저도 이렇게 해서 <strong>약 끊었어요~</strong>"<br><br>
+            💬 댓글: "저도 효과 봤어요!" / "출처가 어디예요?" → <strong>답변 없음</strong>
+          </div>
+          <div class="hl hl-amber" style="margin-top:12px;">
+            <p>🔍 <strong>주목해봐요!</strong></p>
+            <p>→ 구독자가 12만명이면 정보가 정확한 걸까요?</p>
+            <p>→ "약 끊었어요"라는 주장의 근거가 있나요?</p>
+            <p>→ "출처가 어디예요?"라는 질문에 답변이 없는 건 왜일까요?</p>
+          </div>
+        </div>
+        <div class="scf-footer">출처: 유튜브 쇼츠 (출처·근거 없음)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⭐ 카드 C 신뢰도 평가하기</div>
+      <div class="hl hl-blue"><p>💡 구독자가 많으면 신뢰할 수 있을까요? 신뢰도를 평가해봐요!</p></div>
+      <div class="rating-label">카드 C (유튜브 쇼츠)의 신뢰도는?</div>
+      <div class="star-rating-big" id="stars-C">
+        <span class="star-big" onclick="rateSrc('C',1)">⭐</span>
+        <span class="star-big" onclick="rateSrc('C',2)">⭐</span>
+        <span class="star-big" onclick="rateSrc('C',3)">⭐</span>
+        <span class="star-big" onclick="rateSrc('C',4)">⭐</span>
+        <span class="star-big" onclick="rateSrc('C',5)">⭐</span>
+      </div>
+      <div class="rating-result" id="rating-result-C"></div>
+      <div style="margin-top:14px;">
+        <label style="font-size:.9em;color:#0369a1;font-weight:bold;">📝 구독자가 12만 명인 채널인데, 신뢰할 수 있을까요? 이유도 써봐요:</label>
+        <textarea class="discuss-box" id="note-C" placeholder="예) 구독자가 많아도 전문가가 아닐 수 있고, 출처도 없어서..." style="margin-top:8px;" oninput="checkNoteC()"></textarea>
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <button class="btn btn-next" id="btn-next-C" style="opacity:.5;cursor:not-allowed;" onclick="goNextCard('D')">카드 D 보러 가기 →</button>
+      </div>
+      <div class="hl hl-amber" id="hint-next-C" style="margin-top:10px;">
+        <p>💡 별점을 매기고 메모를 쓰면 다음 카드로 넘어갈 수 있어요!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드 D -->
+  <div id="section-cardD" style="display:none;">
+    <div class="card">
+      <div class="card-title">🃏 카드 D 읽기</div>
+      <div class="source-card-full src-hospital">
+        <div class="scf-header">
+          <h3>🏥 대학병원 건강정보</h3>
+          <div class="meta">📍 서울아산병원 건강정보센터 &nbsp;|&nbsp; 📅 2023.08.30</div>
+        </div>
+        <div class="scf-body">
+          <div style="font-size:1em;font-weight:bold;color:#1e293b;margin-bottom:8px;">고혈압의 원인과 치료</div>
+          <div style="font-size:.88em;color:#64748b;">작성자: <strong>서울아산병원 심장내과</strong> (전문의 감수 완료)</div>
+          <div class="content-box">
+            "고혈압의 원인은 크게 두 가지로 나눌 수 있습니다.<br><br>
+            ① <strong>1차성(본태성) 고혈압</strong>: 전체의 약 <strong>90~95%</strong>를 차지하며 유전, 식습관, 비만, 운동 부족 등 복합적인 원인으로 발생합니다.<br><br>
+            ② <strong>2차성 고혈압</strong>: 신장 질환, 호르몬 이상 등 다른 질환으로 인해 발생합니다.<br><br>
+            ※ 본 내용은 <strong>심장내과 전문의가 검토</strong>한 의학 정보입니다."
+          </div>
+          <div class="hl hl-blue" style="margin-top:12px;">
+            <p>🔍 <strong>주목해봐요!</strong></p>
+            <p>→ 작성자의 전문성은 어떤가요?</p>
+            <p>→ 수치(90~95%)의 근거가 있나요?</p>
+            <p>→ 카드 A와 비교할 때 어떤 점이 다른가요?</p>
+          </div>
+        </div>
+        <div class="scf-footer">출처: 서울아산병원 건강정보센터 (전문의 감수)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⭐ 카드 D 신뢰도 평가하기</div>
+      <div class="hl hl-blue"><p>💡 마지막 카드예요! 카드 A와 비교하며 신뢰도를 평가해봐요!</p></div>
+      <div class="rating-label">카드 D (대학병원)의 신뢰도는?</div>
+      <div class="star-rating-big" id="stars-D">
+        <span class="star-big" onclick="rateSrc('D',1)">⭐</span>
+        <span class="star-big" onclick="rateSrc('D',2)">⭐</span>
+        <span class="star-big" onclick="rateSrc('D',3)">⭐</span>
+        <span class="star-big" onclick="rateSrc('D',4)">⭐</span>
+        <span class="star-big" onclick="rateSrc('D',5)">⭐</span>
+      </div>
+      <div class="rating-result" id="rating-result-D"></div>
+      <div style="margin-top:14px;">
+        <label style="font-size:.9em;color:#0369a1;font-weight:bold;">📝 카드 A(블로그)와 카드 D(대학병원)의 차이점을 써봐요:</label>
+        <textarea class="discuss-box" id="note-D" placeholder="예) D는 전문의가 검토하고 수치 근거도 있지만, A는 개인 경험이고 근거가 없어요..." style="margin-top:8px;" oninput="checkNoteD()"></textarea>
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <button class="btn btn-next" id="btn-next-D" style="opacity:.5;cursor:not-allowed;" onclick="completeCardSection()">4개 카드 완료! 토의하러 가기 →</button>
+      </div>
+      <div class="hl hl-amber" id="hint-next-D" style="margin-top:10px;">
+        <p>💡 별점을 매기고 메모를 쓰면 다음으로 넘어갈 수 있어요!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="task-status">
+    <div class="task-status-title">📋 진행 현황</div>
+    <div class="task-item" id="task-1-A"><div class="task-check">A</div> 🔴 카드 A 읽기 + 신뢰도 평가</div>
+    <div class="task-item" id="task-1-B"><div class="task-check">B</div> 🟢 카드 B 읽기 + 신뢰도 평가</div>
+    <div class="task-item" id="task-1-C"><div class="task-check">C</div> 🟡 카드 C 읽기 + 신뢰도 평가</div>
+    <div class="task-item" id="task-1-D"><div class="task-check">D</div> 🔵 카드 D 읽기 + 신뢰도 평가</div>
+  </div>
+</div>
+
+<!-- ══ 2. 토의 질문 ══ -->
+<div class="section" id="tab-2">
+  <div class="card">
+    <div class="card-title">🗣️ 토의 질문</div>
+    <div class="hl hl-purple"><p>💡 방금 읽은 4개 카드를 떠올리며 혼자 먼저 생각해서 답을 적어봐요!</p></div>
+
+    <div style="margin:16px 0;">
+      <div style="background:#f5f3ff;border-radius:14px;padding:16px;margin-bottom:14px;border-left:4px solid #a78bfa;">
+        <p style="color:#5b21b6;font-weight:bold;margin-bottom:8px;">💬 토의 질문 1</p>
+        <p style="margin-bottom:10px;">가장 믿을 수 있는 카드는 무엇인가요? 이유도 쓰세요.</p>
+        <select id="q1-select" onchange="checkDiscuss()" style="font-family:'Jua',sans-serif;padding:8px 12px;border:2px solid #c4b5fd;border-radius:10px;font-size:.92em;margin-bottom:8px;width:100%;background:#f5f3ff;">
+          <option value="">-- 선택하세요 --</option>
+          <option value="A">카드 A (개인 블로그)</option>
+          <option value="B">카드 B (질병관리청)</option>
+          <option value="C">카드 C (유튜브 쇼츠)</option>
+          <option value="D">카드 D (대학병원)</option>
+        </select>
+        <textarea class="discuss-box" id="q1-reason" placeholder="이유: ..." oninput="checkDiscuss()"></textarea>
+      </div>
+
+      <div style="background:#fff7ed;border-radius:14px;padding:16px;margin-bottom:14px;border-left:4px solid #f97316;">
+        <p style="color:#c2410c;font-weight:bold;margin-bottom:8px;">💬 토의 질문 2</p>
+        <p style="margin-bottom:10px;">가장 믿기 어려운 카드는 무엇인가요? 이유도 쓰세요.</p>
+        <select id="q2-select" onchange="checkDiscuss()" style="font-family:'Jua',sans-serif;padding:8px 12px;border:2px solid #fed7aa;border-radius:10px;font-size:.92em;margin-bottom:8px;width:100%;background:#fff7ed;">
+          <option value="">-- 선택하세요 --</option>
+          <option value="A">카드 A (개인 블로그)</option>
+          <option value="B">카드 B (질병관리청)</option>
+          <option value="C">카드 C (유튜브 쇼츠)</option>
+          <option value="D">카드 D (대학병원)</option>
+        </select>
+        <textarea class="discuss-box" id="q2-reason" placeholder="이유: ..." oninput="checkDiscuss()"></textarea>
+      </div>
+
+      <div style="background:#ecfdf5;border-radius:14px;padding:16px;margin-bottom:14px;border-left:4px solid #34d399;">
+        <p style="color:#065f46;font-weight:bold;margin-bottom:8px;">💬 토의 질문 3</p>
+        <p style="margin-bottom:10px;">구독자가 많으면 정보가 정확한 걸까요? 내 생각을 쓰세요.</p>
+        <textarea class="discuss-box" id="q3-ans" placeholder="예) 구독자 수와 정보의 정확성은 관계가 없다고 생각해요. 왜냐하면..." oninput="checkDiscuss()"></textarea>
+      </div>
+
+      <div style="background:#eff6ff;border-radius:14px;padding:16px;border-left:4px solid #60a5fa;">
+        <p style="color:#1d4ed8;font-weight:bold;margin-bottom:8px;">💬 토의 질문 4</p>
+        <p style="margin-bottom:10px;">"~한 것 같아요", "어디서 봤는데" 같은 표현이 많은 글은 왜 믿기 어렵나요?</p>
+        <textarea class="discuss-box" id="q4-ans" placeholder="예) 본인이 확실하지 않다는 뜻이고, 출처도 없어서..." oninput="checkDiscuss()"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="task-status">
+    <div class="task-status-title">📋 4개 질문 모두 답해야 넘어갈 수 있어요!</div>
+    <div class="task-item" id="task-2-q1"><div class="task-check">1</div> 💬 질문 1 답변 완료</div>
+    <div class="task-item" id="task-2-q2"><div class="task-check">2</div> 💬 질문 2 답변 완료</div>
+    <div class="task-item" id="task-2-q3"><div class="task-check">3</div> 💬 질문 3 답변 완료</div>
+    <div class="task-item" id="task-2-q4"><div class="task-check">4</div> 💬 질문 4 답변 완료</div>
+  </div>
+  <div class="complete-btn-wrap">
+    <button class="complete-btn btn-locked" id="complete-btn-2" onclick="tryComplete(2)">토의 완료! 비교 정리하기 →</button>
+  </div>
+</div>
+
+<!-- ══ 3. 비교 정리 ══ -->
+<div class="section" id="tab-3">
+
+  <!-- 출처 카드 미니 요약 (다시 보기) -->
+  <div class="card">
+    <div class="card-title">📋 출처 카드 다시 보기 (참고용)</div>
+    <div class="hl hl-blue"><p>💡 아래 카드를 참고하며 비교 표를 완성해봐요!</p></div>
+
+    <div class="mini-card src-blog" style="border-color:#fca5a5;">
+      <div class="mini-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);">🔴 카드 A | 개인 블로그 · 건강마니아_홍길동</div>
+      <div class="mini-body">
+        📌 주제: 고혈압에 좋은 음식<br>
+        👤 작성자: 일반인 (비전문가)<br>
+        📅 날짜: 2024.03.15<br>
+        🔗 근거: <strong style="color:#dc2626;">없음</strong> ("~한 것 같아요", "어디서 봤는데")<br>
+        ✅ 전문가 검토: <strong style="color:#dc2626;">없음</strong>
+      </div>
+    </div>
+
+    <div class="mini-card src-gov" style="border-color:#6ee7b7;">
+      <div class="mini-header" style="background:linear-gradient(135deg,#10b981,#059669);">🟢 카드 B | 질병관리청 국가건강정보포털</div>
+      <div class="mini-body">
+        📌 주제: 고혈압이란?<br>
+        👤 작성자: 질병관리청 (정부 공공기관)<br>
+        📅 날짜: 2023.11.01 (최종수정)<br>
+        🔗 근거: <strong style="color:#059669;">있음</strong> (2023 국민건강통계, 140mmHg 기준)<br>
+        ✅ 전문가 검토: <strong style="color:#059669;">있음</strong> (대한고혈압학회 진료지침 근거)
+      </div>
+    </div>
+
+    <div class="mini-card src-youtube" style="border-color:#fde68a;">
+      <div class="mini-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);">🟡 카드 C | 유튜브 쇼츠 · 건강TV_shorts</div>
+      <div class="mini-body">
+        📌 주제: 고혈압 낫는 법<br>
+        👤 작성자: 불명확 (구독자 12만명)<br>
+        📅 날짜: 2024.01.20<br>
+        🔗 근거: <strong style="color:#dc2626;">없음</strong> (출처 질문에 답변 없음)<br>
+        ✅ 전문가 검토: <strong style="color:#dc2626;">없음</strong>
+      </div>
+    </div>
+
+    <div class="mini-card src-hospital" style="border-color:#93c5fd;">
+      <div class="mini-header" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">🔵 카드 D | 서울아산병원 건강정보센터</div>
+      <div class="mini-body">
+        📌 주제: 고혈압의 원인과 치료<br>
+        👤 작성자: 서울아산병원 심장내과<br>
+        📅 날짜: 2023.08.30<br>
+        🔗 근거: <strong style="color:#059669;">있음</strong> (1차성 90~95% 등 수치 근거)<br>
+        ✅ 전문가 검토: <strong style="color:#059669;">있음</strong> (전문의 감수 완료)
+      </div>
+    </div>
+  </div>
+
+  <!-- 빈칸 채우기 -->
+  <div class="card">
+    <div class="card-title">✏️ 빈칸 채우기 — 위 카드를 참고해서 써봐요!</div>
+    <div class="blank-wrap">
+      <p style="margin-bottom:8px;">카드 A(블로그)의 작성자는 <input class="blank" id="bl1" data-ans="개인" placeholder="?"> 이며, 근거가 <input class="blank" id="bl2" data-ans="없다" placeholder="?"> .</p>
+      <p style="margin-bottom:8px;">카드 B(질병관리청)는 <input class="blank" id="bl3" data-ans="공공기관" placeholder="?"> 이 작성하여, 통계 출처가 <input class="blank" id="bl4" data-ans="있다" placeholder="?"> .</p>
+      <p style="margin-bottom:8px;">카드 C(유튜브)는 구독자가 많지만, 정보의 <input class="blank" id="bl5" data-ans="출처" placeholder="?"> 가 없다.</p>
+      <p>카드 D(대학병원)는 <input class="blank" id="bl6" data-ans="전문의" placeholder="?"> 가 검토한 정보이다.</p>
+    </div>
+    <button class="btn btn-green" onclick="checkBlanks3()">✅ 확인하기</button>
+    <button class="btn btn-ghost" onclick="resetBlanks3()">🔄 다시하기</button>
+    <div class="result-box" id="result3">
+      <div id="result3-score" style="font-size:1.3em;margin-bottom:6px;"></div>
+      <div id="result3-msg"></div>
+    </div>
+  </div>
+
+  <!-- 비교 표 -->
+  <div class="card">
+    <div class="card-title">📊 4가지 출처 한눈에 비교</div>
+    <div class="compare-wrap">
+      <table class="compare-tbl">
+        <thead>
+          <tr><th>항목</th><th>🔴 A 블로그</th><th>🟢 B 공공기관</th><th>🟡 C 유튜브</th><th>🔵 D 대학병원</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>작성자 전문성</strong></td><td class="bad">❌ 일반인</td><td class="good">✅ 정부기관</td><td class="bad">❌ 불명확</td><td class="good">✅ 전문의</td></tr>
+          <tr><td><strong>근거·출처 제시</strong></td><td class="bad">❌ 없음</td><td class="good">✅ 있음</td><td class="bad">❌ 없음</td><td class="good">✅ 있음</td></tr>
+          <tr><td><strong>전문가 검토</strong></td><td class="bad">❌ 없음</td><td class="good">✅ 있음</td><td class="bad">❌ 없음</td><td class="good">✅ 있음</td></tr>
+          <tr><td><strong>신뢰도 종합</strong></td><td class="bad">⭐</td><td class="good">⭐⭐⭐⭐⭐</td><td class="bad">⭐⭐</td><td class="good">⭐⭐⭐⭐⭐</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-blue" onclick="markTask(3,'table')">📊 표 확인 완료!</button>
+  </div>
+
+  <div class="task-status">
+    <div class="task-status-title">📋 빈칸 채우기 + 표 확인을 해야 넘어갈 수 있어요!</div>
+    <div class="task-item" id="task-3-blank"><div class="task-check">1</div> ✏️ 빈칸 채우기 완료</div>
+    <div class="task-item" id="task-3-table"><div class="task-check">2</div> 📊 비교표 확인 완료</div>
+  </div>
+  <div class="complete-btn-wrap">
+    <button class="complete-btn btn-locked" id="complete-btn-3" onclick="tryComplete(3)">비교 완료! 기준 세우기 →</button>
+  </div>
+</div>
+
+<!-- ══ 4. 기준 세우기 ══ -->
+<div class="section" id="tab-4">
+  <div class="card">
+    <div class="card-title">✅ 신뢰할 수 있는 출처의 기준</div>
+    <div class="hl hl-green"><p>💡 오늘 활동을 통해 알게 된 것을 바탕으로, 중요하다고 생각하는 기준을 <strong>모두 클릭</strong>해봐요! (최소 4개)</p></div>
+    <div class="criteria-grid">
+      <div class="criteria-item" id="cr-1" onclick="toggleCriteria('cr-1')"><div class="criteria-icon">👤</div><div class="criteria-text">작성자(기관 또는 전문가)가 명확하다</div></div>
+      <div class="criteria-item" id="cr-2" onclick="toggleCriteria('cr-2')"><div class="criteria-icon">📅</div><div class="criteria-text">작성 또는 수정 날짜가 표시되어 있다</div></div>
+      <div class="criteria-item" id="cr-3" onclick="toggleCriteria('cr-3')"><div class="criteria-icon">🔗</div><div class="criteria-text">통계나 연구 결과 등 근거가 제시되어 있다</div></div>
+      <div class="criteria-item" id="cr-4" onclick="toggleCriteria('cr-4')"><div class="criteria-icon">🏛️</div><div class="criteria-text">공공기관·병원·학교 등 공신력 있는 기관의 사이트다</div></div>
+      <div class="criteria-item" id="cr-5" onclick="toggleCriteria('cr-5')"><div class="criteria-icon">🩺</div><div class="criteria-text">전문가가 검토(감수)했다고 명시되어 있다</div></div>
+      <div class="criteria-item" id="cr-6" onclick="toggleCriteria('cr-6')"><div class="criteria-icon">📝</div><div class="criteria-text">"~한 것 같아요" 같은 불확실한 표현이 없다</div></div>
+      <div class="criteria-item" id="cr-7" onclick="toggleCriteria('cr-7')"><div class="criteria-icon">👥</div><div class="criteria-text">구독자·조회수가 많다 ← 이건 기준이 될까요?</div></div>
+      <div class="criteria-item" id="cr-8" onclick="toggleCriteria('cr-8')"><div class="criteria-icon">🔄</div><div class="criteria-text">최근에 업데이트된 정보다</div></div>
+    </div>
+    <div id="criteria-fb" style="display:none;" class="hl hl-green"></div>
+    <button class="btn btn-green" onclick="checkCriteria()" style="margin-top:10px;">✅ 기준 확인하기</button>
+    <div style="margin-top:16px;">
+      <label style="font-size:.9em;color:#0369a1;font-weight:bold;">✍️ 신뢰할 수 있는 출처란 무엇인지 내 말로 정리해봐요:</label>
+      <textarea class="discuss-box" id="criteria-summary" placeholder="신뢰할 수 있는 출처란, ..." oninput="checkCriteriaSummary()" style="margin-top:8px;min-height:100px;"></textarea>
+    </div>
+  </div>
+  <div class="task-status">
+    <div class="task-status-title">📋 기준 선택 + 내 말로 정리를 해야 넘어갈 수 있어요!</div>
+    <div class="task-item" id="task-4-criteria"><div class="task-check">1</div> ✅ 기준 4개 이상 선택</div>
+    <div class="task-item" id="task-4-summary"><div class="task-check">2</div> ✍️ 내 말로 정리 완료</div>
+  </div>
+  <div class="complete-btn-wrap">
+    <button class="complete-btn btn-locked" id="complete-btn-4" onclick="tryComplete(4)">기준 완료! 확인 문제 →</button>
+  </div>
+</div>
+
+<!-- ══ 5. 확인 문제 ══ -->
+<div class="section" id="tab-5">
+  <div class="card">
+    <div class="card-title">✏️ 확인 문제</div>
+    <div class="hl hl-blue"><p>💡 오늘 배운 내용을 문제로 확인해봐요!</p></div>
+    <div id="quizArea5"></div>
+  </div>
+  <div class="task-status">
+    <div class="task-status-title">📋 확인 문제를 모두 풀어야 넘어갈 수 있어요!</div>
+    <div class="task-item" id="task-5-quiz"><div class="task-check">📝</div> 확인 문제 모두 풀기</div>
+  </div>
+  <div class="complete-btn-wrap">
+    <button class="complete-btn btn-locked" id="complete-btn-5" onclick="tryComplete(5)">문제 완료! 마무리하기 →</button>
+  </div>
+</div>
+
+<!-- ══ 6. 마무리 ══ -->
+<div class="section" id="tab-6">
+  <div class="card">
+    <div class="card-title">🎯 오늘의 학습 정리</div>
+    <div class="hl hl-blue">
+      <p>📌 <strong>신뢰할 수 있는 출처의 조건</strong></p>
+      <p>✅ 작성자(기관/전문가)가 명확하다</p>
+      <p>✅ 날짜가 표시되어 있다</p>
+      <p>✅ 근거(통계, 연구)가 제시되어 있다</p>
+      <p>✅ 공공기관·병원·학교의 사이트다</p>
+      <p>✅ 전문가 검토가 있다</p>
+    </div>
+    <div class="hl hl-red">
+      <p>⚠️ <strong>주의!</strong> 구독자 수·조회수·좋아요는 신뢰도의 기준이 아니에요!</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">💭 오늘의 다짐</div>
+    <textarea class="discuss-box" id="final-reflection" placeholder="앞으로 나는 정보를 찾을 때..." oninput="checkFinal()" style="min-height:100px;"></textarea>
+    <button class="btn btn-blue" style="margin-top:10px;" onclick="saveFinal()">💾 저장하기</button>
+    <div id="final-done" style="display:none;" class="hl hl-green">
+      <p>🎉 1단계 학습 완료! 아래 제출 버튼을 눌러주세요 🌸</p>
+    </div>
+  </div>
+  <div class="task-status">
+    <div class="task-status-title">📋 오늘의 다짐을 쓰고 저장해요!</div>
+    <div class="task-item" id="task-6-final"><div class="task-check">💭</div> 오늘의 다짐 작성 및 저장</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- 축하 오버레이 -->
+<div class="congrats-overlay" id="congratsOverlay">
+  <div class="congrats-box">
+    <div style="font-size:4em;margin-bottom:12px;" id="congratsEmoji">🎉</div>
+    <h2 id="congratsTitle">완료!</h2>
+    <p id="congratsMsg">수고했어요!</p>
+    <button class="btn btn-blue" onclick="closeCongratsAndNext()">다음으로 가기 →</button>
+    <button class="btn btn-ghost" style="margin-top:6px;display:block;width:100%;" onclick="document.getElementById('congratsOverlay').classList.remove('show')">계속 복습하기</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>🔍 정보 리터러시 학습 1단계 | ATL 기능 기르기</p>
+  <div class="made-by">🔍 Made by 소연티쳐 🔍</div>
+</footer>
+
+<!-- 제출 카드 -->
+<div class="submit-card">
+  <div class="submit-inner">
+    <div class="card-title">📤 선생님께 결과 제출하기</div>
+    <div class="submit-info-box">
+      👤 이름: <strong id="res-name" style="color:#0369a1;">-</strong> &nbsp;|&nbsp; 🏫 반/번호: <strong id="res-class" style="color:#0369a1;">-</strong><br>
+      ⭐ 신뢰도 평가: <strong id="res-rating" style="color:#0369a1;">미완료</strong><br>
+      📝 확인문제 점수: <strong id="res-score" style="color:#0369a1;">미완료</strong><br>
+      💭 토의 답변: <strong id="res-discuss" style="color:#0369a1;">미완료</strong>
+    </div>
+    <button class="submit-btn-main" id="submitBtn" onclick="submitResult()">📤 선생님께 결과 제출하기</button>
+    <div class="submit-done-box" id="submitDone">
+      <div style="font-size:2.5rem;margin-bottom:8px;">✅</div>
+      <div style="font-size:1.1em;color:#059669;font-weight:bold;">제출 완료!</div>
+      <div style="font-size:.9em;color:var(--muted);margin-top:4px;">선생님께 결과가 전달되었어요 🌸</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /mainApp -->
+
+<script>
+/* ══ 로그인 & 제출 ══ */
+var _student = {cls:'', num:'', name:''};
+var _startTime = null;
+var _quizScore = '미완료';
+var _ratingStr = '미완료';
+var _discussStr = '미완료';
+
+function doLogin() {
+  var cls  = document.getElementById('inp-class').value.trim();
+  var num  = document.getElementById('inp-num').value.trim();
+  var name = document.getElementById('inp-name').value.trim();
+  var err  = document.getElementById('loginErr');
+  if (!cls||!num||!name) {
+    err.style.display='block';
+    if(!cls) document.getElementById('inp-class').classList.add('err');
+    if(!num) document.getElementById('inp-num').classList.add('err');
+    if(!name) document.getElementById('inp-name').classList.add('err');
+    return;
+  }
+  err.style.display='none';
+  _student={cls,num,name};
+  _startTime=new Date();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  var badge=document.getElementById('studentBadge');
+  badge.textContent='👤 '+cls+'반 '+num+'번 '+name;
+  badge.style.display='inline-block';
+  document.getElementById('res-name').textContent=name;
+  document.getElementById('res-class').textContent=cls+'반 '+num+'번';
+  initQuiz5();
+}
+
+function _calcTime() {
+  if(!_startTime) return '-';
+  var diff=Math.floor((new Date()-_startTime)/1000);
+  return Math.floor(diff/60)+'분 '+(diff%60)+'초';
+}
+
+function submitResult() {
+  // 제출 직전 최신 답변 수집
+  _discussStr =
+    '[질문1] '+(document.getElementById('q1-select').value||'-')+': '+(document.getElementById('q1-reason').value.trim().slice(0,50)||'-')+
+    ' | [질문2] '+(document.getElementById('q2-select').value||'-')+': '+(document.getElementById('q2-reason').value.trim().slice(0,50)||'-')+
+    ' | [질문3] '+(document.getElementById('q3-ans').value.trim().slice(0,50)||'-')+
+    ' | [질문4] '+(document.getElementById('q4-ans').value.trim().slice(0,50)||'-');
+  document.getElementById('res-discuss').textContent = _discussStr.slice(0,30)+'...';
+
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='⏳ 제출 중...';
+
+  // ★ 구글 폼 URL과 entry 번호를 교체해주세요
+  var FORM_URL='https://docs.google.com/forms/u/0/d/e/1FAIpQLSf8WNTTjK1kKTPT47YQ-HAiyfwz67-z4OGF1Uqy3FsJohn1Hg/formResponse';
+  var ENTRIES={
+    cls:   'entry.409768186',
+    num:   'entry.167649761',
+    name:  'entry.282256488',
+    rating:'entry.1852691433',
+    score: 'entry.403198968',
+    discuss:'entry.614377714',
+    summary:'entry.1527685552',
+    reflection:'entry.432019360',
+    time:  'entry.902918996'
+  };
+  var summaryVal = document.getElementById('criteria-summary') ? document.getElementById('criteria-summary').value.trim() : '-';
+  var reflectionVal = document.getElementById('final-reflection') ? document.getElementById('final-reflection').value.trim() : '-';
+
+  var body =
+    encodeURIComponent(ENTRIES.cls)       +'='+ encodeURIComponent(_student.cls)  +'&'+
+    encodeURIComponent(ENTRIES.num)       +'='+ encodeURIComponent(_student.num)  +'&'+
+    encodeURIComponent(ENTRIES.name)      +'='+ encodeURIComponent(_student.name) +'&'+
+    encodeURIComponent(ENTRIES.rating)    +'='+ encodeURIComponent(_ratingStr)    +'&'+
+    encodeURIComponent(ENTRIES.score)     +'='+ encodeURIComponent(_quizScore)    +'&'+
+    encodeURIComponent(ENTRIES.discuss)   +'='+ encodeURIComponent(_discussStr)   +'&'+
+    encodeURIComponent(ENTRIES.summary)   +'='+ encodeURIComponent(summaryVal)    +'&'+
+    encodeURIComponent(ENTRIES.reflection)+'='+ encodeURIComponent(reflectionVal) +'&'+
+    encodeURIComponent(ENTRIES.time)      +'='+ encodeURIComponent(_calcTime());
+
+  fetch(FORM_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
+    .then(()=>_showSubmitDone()).catch(()=>_showSubmitDone());
+}
+function _showSubmitDone(){
+  document.getElementById('submitBtn').style.display='none';
+  document.getElementById('submitDone').style.display='block';
+}
+
+/* ══ 챕터 관리 ══ */
+const TOTAL=7;
+let unlockedUpTo=0, currentChapter=0, nextAfterCongrats=1;
+const CHAPTER_TASKS={
+  0:['think'],
+  1:['A','B','C','D'],   // 카드별로 완료 처리
+  2:['q1','q2','q3','q4'],
+  3:['blank','table'],
+  4:['criteria','summary'],
+  5:['quiz'],
+  6:['final']
+};
+const completedTasks={};
+for(let i=0;i<TOTAL;i++) completedTasks[i]=new Set();
+
+function markTask(chapterIdx, taskKey){
+  completedTasks[chapterIdx].add(taskKey);
+  const el=document.getElementById('task-'+chapterIdx+'-'+taskKey);
+  if(el) el.classList.add('done');
+  checkAllTasks(chapterIdx);
+}
+function checkAllTasks(idx){
+  const req=CHAPTER_TASKS[idx]; if(!req) return;
+  const allDone=req.every(t=>completedTasks[idx].has(t));
+  const btn=document.getElementById('complete-btn-'+idx);
+  if(btn) btn.classList.toggle('btn-locked',!allDone);
+}
+function tryComplete(idx){
+  const req=CHAPTER_TASKS[idx];
+  const allDone=req?req.every(t=>completedTasks[idx].has(t)):true;
+  if(!allDone){ showToast('🔒 아직 완료하지 않은 항목이 있어요!'); return; }
+  completeChapter(idx);
+}
+function completeChapter(idx){
+  if(idx>=unlockedUpTo){unlockedUpTo=idx+1; unlockBtn(idx+1);}
+  nextAfterCongrats=idx+1;
+  if(idx+1<TOTAL) showCongrats(idx);
+  else showFinalCongrats();
+  updateProg();
+}
+function goChapter(idx){
+  if(idx>unlockedUpTo){showToast('🔒 이전 챕터를 먼저 완료해주세요!'); return;}
+  currentChapter=idx;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+idx).classList.add('active');
+  document.getElementById('ch-btn-'+idx).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateProg();
+}
+function unlockBtn(idx){
+  if(idx>=TOTAL) return;
+  const btn=document.getElementById('ch-btn-'+idx); if(!btn) return;
+  btn.classList.remove('locked');
+  btn.textContent=btn.textContent.replace('🔒 ','');
+}
+const cMsgs=[
+  ['🔍','시작 완료!','카드를 읽고 신뢰도를 평가해봐요 🃏'],
+  ['🃏','카드 평가 완료!','토의 질문에 답해봐요 🗣️'],
+  ['🗣️','토의 완료!','비교 정리를 해봐요 📊'],
+  ['📊','비교 완료!','신뢰 기준을 세워봐요 ✅'],
+  ['✅','기준 세우기 완료!','확인 문제에 도전해봐요 ✏️'],
+  ['✏️','확인 문제 완료!','마무리해봐요 🎯'],
+];
+function showCongrats(idx){
+  const m=cMsgs[idx]||['🎉','완료!','수고했어요!'];
+  document.getElementById('congratsEmoji').textContent=m[0];
+  document.getElementById('congratsTitle').textContent=m[1];
+  document.getElementById('congratsMsg').textContent=m[2];
+  document.getElementById('congratsOverlay').classList.add('show');
+}
+function showFinalCongrats(){
+  document.getElementById('congratsEmoji').textContent='🏆';
+  document.getElementById('congratsTitle').textContent='1단계 완료!';
+  document.getElementById('congratsMsg').textContent='정보 리터러시 1단계 마스터! 🔍✨';
+  document.getElementById('congratsOverlay').classList.add('show');
+}
+function closeCongratsAndNext(){
+  document.getElementById('congratsOverlay').classList.remove('show');
+  if(nextAfterCongrats<TOTAL) goChapter(nextAfterCongrats);
+}
+function updateProg(){
+  const pct=Math.round((unlockedUpTo/TOTAL)*100);
+  document.getElementById('pFill').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+}
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('lockToast');
+  t.textContent=msg; t.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function toggleEl(id){
+  const e=document.getElementById(id);
+  e.style.display=e.style.display==='none'?'block':'none';
+}
+
+/* ══ 카드별 순서 진행 관리 ══ */
+const ratings={A:0,B:0,C:0,D:0};
+const notesDone={A:false,B:false,C:false,D:false};
+
+// 단계 표시기 업데이트
+function updateStepIndicator(current, doneList){
+  const cards=['A','B','C','D'];
+  cards.forEach((c,i)=>{
+    const dot=document.getElementById('dot-'+c);
+    if(!dot) return;
+    dot.classList.remove('current','done');
+    if(doneList.includes(c)) dot.classList.add('done');
+    else if(c===current) dot.classList.add('current');
+  });
+  ['AB','BC','CD'].forEach(pair=>{
+    const con=document.getElementById('con-'+pair);
+    if(!con) return;
+    con.classList.toggle('done', doneList.includes(pair[0])&&doneList.includes(pair[1]));
+  });
+  const labels={A:'카드 A 읽고 신뢰도 평가하기',B:'카드 B 읽고 신뢰도 평가하기',C:'카드 C 읽고 신뢰도 평가하기',D:'카드 D 읽고 신뢰도 평가하기'};
+  const lbl=document.getElementById('step-label');
+  if(lbl && labels[current]) lbl.textContent=labels[current];
+}
+
+function rateSrc(id, score){
+  ratings[id]=score;
+  const stars=document.getElementById('stars-'+id).querySelectorAll('.star-big');
+  stars.forEach((s,i)=>s.classList.toggle('active',i<score));
+  const scoreTexts=['','😕 1점 — 전혀 믿기 어려워요','😟 2점 — 믿기 어려워요','😐 3점 — 보통이에요','😊 4점 — 믿을 수 있어요','🌟 5점 — 매우 신뢰할 수 있어요'];
+  const rr=document.getElementById('rating-result-'+id);
+  if(rr) rr.textContent=scoreTexts[score]||'';
+  _updateRatingStr();
+  _tryEnableNextBtn(id);
+}
+
+function _updateRatingStr(){
+  _ratingStr='A:'+ratings.A+'점 B:'+ratings.B+'점 C:'+ratings.C+'점 D:'+ratings.D+'점';
+  document.getElementById('res-rating').textContent=_ratingStr;
+}
+
+function _tryEnableNextBtn(id){
+  const hasRating = ratings[id]>0;
+  const hasNote   = notesDone[id];
+  const btn=document.getElementById('btn-next-'+id);
+  const hint=document.getElementById('hint-next-'+id);
+  if(btn){
+    if(hasRating&&hasNote){
+      btn.style.opacity='1'; btn.style.cursor='pointer';
+      if(hint) hint.style.display='none';
+    } else {
+      btn.style.opacity='.5'; btn.style.cursor='not-allowed';
+      if(hint) hint.style.display='block';
+    }
+  }
+}
+
+function checkNoteA(){
+  const v=document.getElementById('note-A').value.trim();
+  notesDone.A=v.length>=5;
+  _tryEnableNextBtn('A');
+}
+function checkNoteB(){
+  const v=document.getElementById('note-B').value.trim();
+  notesDone.B=v.length>=5;
+  _tryEnableNextBtn('B');
+}
+function checkNoteC(){
+  const v=document.getElementById('note-C').value.trim();
+  notesDone.C=v.length>=5;
+  _tryEnableNextBtn('C');
+}
+function checkNoteD(){
+  const v=document.getElementById('note-D').value.trim();
+  notesDone.D=v.length>=5;
+  _tryEnableNextBtn('D');
+}
+
+// 완료 체크 & 다음 카드 이동
+const doneSections=[];
+
+function goNextCard(nextId){
+  const prevId = {B:'A',C:'B',D:'C'}[nextId];
+  if(!prevId) return;
+  if(ratings[prevId]===0){ showToast('⭐ 별점을 먼저 매겨주세요!'); return; }
+  if(!notesDone[prevId]){ showToast('📝 메모를 더 자세히 써봐요! (5글자 이상)'); return; }
+
+  // 이전 카드 완료 처리
+  doneSections.push(prevId);
+  markTask(1, prevId);
+
+  // 이전 카드 섹션 숨기기
+  const prevSec=document.getElementById('section-card'+prevId);
+  if(prevSec){
+    prevSec.style.opacity='0.5';
+    prevSec.style.pointerEvents='none';
+    const doneLabel=document.createElement('div');
+    doneLabel.innerHTML='<div style="text-align:center;padding:8px;background:#ecfdf5;border-radius:10px;color:#059669;font-weight:bold;margin-bottom:10px;">✅ 카드 '+prevId+' 완료!</div>';
+    prevSec.insertBefore(doneLabel, prevSec.firstChild);
+  }
+
+  // 다음 카드 섹션 표시
+  const nextSec=document.getElementById('section-card'+nextId);
+  if(nextSec){
+    nextSec.style.display='block';
+    nextSec.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // 단계 표시기 업데이트
+  updateStepIndicator(nextId, doneSections.slice());
+}
+
+function completeCardSection(){
+  // 카드 D 완료 처리
+  if(ratings.D===0){ showToast('⭐ 카드 D 별점을 먼저 매겨주세요!'); return; }
+  if(!notesDone.D){ showToast('📝 카드 D 메모를 더 자세히 써봐요!'); return; }
+  doneSections.push('D');
+  markTask(1,'D');
+
+  // 모든 단계 완료 표시
+  updateStepIndicator('', ['A','B','C','D']);
+  const lbl=document.getElementById('step-label');
+  if(lbl) lbl.textContent='✅ 4개 카드 모두 완료!';
+
+  // 챕터 1 완료
+  completeChapter(1);
+}
+
+/* ══ 토의 질문 ══ */
+function checkDiscuss(){
+  const q1s=document.getElementById('q1-select').value;
+  const q1r=document.getElementById('q1-reason').value.trim();
+  const q2s=document.getElementById('q2-select').value;
+  const q2r=document.getElementById('q2-reason').value.trim();
+  const q3=document.getElementById('q3-ans').value.trim();
+  const q4=document.getElementById('q4-ans').value.trim();
+  if(q1s&&q1r.length>=5) markTask(2,'q1');
+  if(q2s&&q2r.length>=5) markTask(2,'q2');
+  if(q3.length>=10) markTask(2,'q3');
+  if(q4.length>=10) markTask(2,'q4');
+}
+
+/* ══ 빈칸 채우기 ══ */
+function checkBlanks3(){
+  const checks=[
+    {id:'bl1',ans:['개인','일반인','전문가가 아']},
+    {id:'bl2',ans:['없다','없음']},
+    {id:'bl3',ans:['공공기관','정부','기관']},
+    {id:'bl4',ans:['있다','있음']},
+    {id:'bl5',ans:['출처','근거']},
+    {id:'bl6',ans:['전문의','의사','전문가']},
+  ];
+  let ok=0;
+  checks.forEach(c=>{
+    const el=document.getElementById(c.id);
+    const val=el.value.trim();
+    const correct=c.ans.some(a=>val.includes(a)||a.includes(val)&&val.length>0);
+    el.className='blank '+(correct?'ok':'err');
+    if(correct) ok++;
+  });
+  const r=document.getElementById('result3');
+  r.className='result-box show '+(ok>=5?'good':'info');
+  document.getElementById('result3-score').textContent=ok+'/6 정답! '+(ok===6?'🎉':'💪');
+  document.getElementById('result3-msg').textContent=ok>=5?'훌륭해요! 출처 카드의 차이를 잘 이해했어요!':'위 카드를 다시 보며 도전해봐요!';
+  if(ok>=4) markTask(3,'blank');
+}
+function resetBlanks3(){
+  ['bl1','bl2','bl3','bl4','bl5','bl6'].forEach(id=>{
+    const el=document.getElementById(id); el.value=''; el.className='blank';
+  });
+  document.getElementById('result3').className='result-box';
+}
+
+/* ══ 기준 세우기 ══ */
+const selectedCriteria=new Set();
+function toggleCriteria(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('checked');
+  if(el.classList.contains('checked')) selectedCriteria.add(id);
+  else selectedCriteria.delete(id);
+  if(selectedCriteria.size>=4) markTask(4,'criteria');
+}
+function checkCriteria(){
+  const fb=document.getElementById('criteria-fb');
+  if(selectedCriteria.has('cr-7')){
+    fb.style.display='block';
+    fb.className='hl hl-amber';
+    fb.innerHTML='💛 <strong>구독자·조회수</strong>는 신뢰도의 기준이 아니에요! 다시 생각해볼까요? 카드 C를 떠올려봐요.';
+  } else if(selectedCriteria.size>=4){
+    fb.style.display='block';
+    fb.className='hl hl-green';
+    fb.innerHTML='✅ 훌륭해요! 좋은 기준들을 골랐어요!';
+  } else {
+    fb.style.display='block';
+    fb.className='hl hl-red';
+    fb.innerHTML='⚠️ 최소 4개 이상 선택해야 해요!';
+  }
+}
+function checkCriteriaSummary(){
+  const v=document.getElementById('criteria-summary').value.trim();
+  if(v.length>=15&&selectedCriteria.size>=4) markTask(4,'summary');
+}
+
+/* ══ 확인 문제 ══ */
+const QUESTIONS5=[
+  {q:'다음 중 신뢰하기 가장 어려운 출처는?',opts:['① 질병관리청 국가건강정보포털','② 서울아산병원 전문의 감수 자료','③ 구독자 100만명 유튜브 채널 (출처 없음)','④ 대한의학회 공식 가이드라인'],ans:2,exp:'구독자 수는 정보 정확성과 무관해요! 출처와 전문가 검토 여부가 더 중요합니다 🔍'},
+  {q:'"~한 것 같아요", "어디서 봤는데"처럼 불확실한 표현이 많은 글을 신뢰하기 어려운 이유는?',opts:['① 글이 너무 짧아서','② 작성자 자신도 확신하지 못하고 근거가 없어서','③ 이모지를 많이 사용해서','④ 댓글이 많이 달려있어서'],ans:1,exp:'불확실한 표현은 작성자 자신도 확신하지 못한다는 의미예요 🔍'},
+  {q:'신뢰할 수 있는 출처의 조건으로 옳지 않은 것은?',opts:['① 전문가(기관)가 작성했다','② 통계나 연구 결과가 제시되어 있다','③ 유튜브 조회수가 100만 이상이다','④ 최근에 업데이트된 정보다'],ans:2,exp:'조회수는 신뢰도와 관계없어요! 조회수 높아도 잘못된 정보일 수 있어요 🔍'},
+  {q:'카드 B(질병관리청)가 카드 A(블로그)보다 신뢰할 수 있는 이유로 옳은 것은?',opts:['① 글이 더 길기 때문에','② 이미지가 더 많기 때문에','③ 전문가 검토와 통계 근거가 있기 때문에','④ 더 오래된 정보이기 때문에'],ans:2,exp:'전문가 검토와 근거 있는 통계가 신뢰의 핵심이에요 🔍'},
+];
+let curQ5=0,results5=[],answered5=false,inited5=false;
+function initQuiz5(){if(inited5)return;inited5=true;renderQuiz5();}
+function renderQuiz5(){
+  if(curQ5>=QUESTIONS5.length){showResult5();return;}
+  const q=QUESTIONS5[curQ5]; answered5=false;
+  document.getElementById('quizArea5').innerHTML=`
+    <div style="background:#f0f9ff;border-radius:16px;padding:20px;border:1.5px solid #bae6fd;margin-bottom:14px;">
+      <div style="font-size:.82em;color:#60a5fa;margin-bottom:8px;">문제 ${curQ5+1} / ${QUESTIONS5.length} 🔍</div>
+      <div style="font-size:1em;line-height:1.7;margin-bottom:14px;">${q.q}</div>
+      <div id="opts5">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQ5(${i})">${o}</button>`).join('')}</div>
+    </div>
+    <div class="exp-box" id="exp5"><div id="exp5t" style="margin-bottom:6px;"></div><div id="exp5b" style="line-height:1.85;font-size:.93em;"></div></div>
+    <div id="next5" style="text-align:center;margin-top:12px;display:none;">
+      <button class="btn btn-blue" onclick="nextQ5()">${curQ5+1<QUESTIONS5.length?'다음 문제 →':'결과 보기 🎉'}</button>
+    </div>`;
+}
+function answerQ5(idx){
+  if(answered5)return; answered5=true;
+  const q=QUESTIONS5[curQ5], ok=idx===q.ans;
+  results5.push(ok);
+  document.querySelectorAll('#opts5 .quiz-opt').forEach((o,i)=>{
+    o.disabled=true; o.style.cursor='default';
+    if(i===q.ans) o.classList.add('right');
+    else if(i===idx&&!ok) o.classList.add('wrong');
+  });
+  const box=document.getElementById('exp5');
+  box.className='exp-box show '+(ok?'ok':'ng');
+  document.getElementById('exp5t').textContent=ok?'✅ 정답이에요! 🎉':'❌ 아쉬워요!';
+  document.getElementById('exp5b').innerHTML=q.exp;
+  document.getElementById('next5').style.display='block';
+}
+function nextQ5(){curQ5++;renderQuiz5();}
+function showResult5(){
+  const c=results5.filter(Boolean).length,t=QUESTIONS5.length;
+  const pct=Math.round(c/t*100);
+  _quizScore=c+'/'+t+' ('+pct+'%)';
+  document.getElementById('res-score').textContent=_quizScore;
+  document.getElementById('quizArea5').innerHTML=`
+    <div style="text-align:center;padding:24px 0;">
+      <div style="font-size:3em;margin-bottom:12px;">${pct===100?'🏆':pct>=75?'🌟':'💪'}</div>
+      <div style="font-size:1.8em;color:#0369a1;margin-bottom:8px;">${c} / ${t} 정답!</div>
+      <div style="color:var(--muted);margin-bottom:18px;">${pct>=75?'정보 리터러시 실력이 늘었어요! 🔍':'한 번 더 복습해봐요! 💪'}</div>
+      <button class="btn btn-ghost" onclick="restartQ5()">🔄 다시 풀기</button>
+    </div>`;
+  markTask(5,'quiz');
+}
+function restartQ5(){curQ5=0;results5=[];answered5=false;inited5=false;initQuiz5();}
+
+/* ══ 마무리 ══ */
+function checkFinal(){
+  const v=document.getElementById('final-reflection').value.trim();
+  if(v.length>=15){
+    markTask(6,'final');
+  }
+}
+function saveFinal(){
+  checkFinal();
+  const v=document.getElementById('final-reflection').value.trim();
+  if(v.length>=15){
+    document.getElementById('final-done').style.display='block';
+    completeChapter(6);
+  } else {
+    showToast('💭 조금 더 자세히 써봐요!');
+  }
+}
+</script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+/* ══ 로그인 & 제출 ══ */
+var _student = {cls:'', num:'', name:''};
+var _startTime = null;
+var _quizScore = '미완료';
+var _ratingStr = '미완료';
+var _discussStr = '미완료';
+
+function doLogin() {
+  var cls  = document.getElementById('inp-class').value.trim();
+  var num  = document.getElementById('inp-num').value.trim();
+  var name = document.getElementById('inp-name').value.trim();
+  var err  = document.getElementById('loginErr');
+  if (!cls||!num||!name) {
+    err.style.display='block';
+    if(!cls) document.getElementById('inp-class').classList.add('err');
+    if(!num) document.getElementById('inp-num').classList.add('err');
+    if(!name) document.getElementById('inp-name').classList.add('err');
+    return;
+  }
+  err.style.display='none';
+  _student={cls,num,name};
+  _startTime=new Date();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  var badge=document.getElementById('studentBadge');
+  badge.textContent='👤 '+cls+'반 '+num+'번 '+name;
+  badge.style.display='inline-block';
+  document.getElementById('res-name').textContent=name;
+  document.getElementById('res-class').textContent=cls+'반 '+num+'번';
+  initQuiz5();
+}
+
+function _calcTime() {
+  if(!_startTime) return '-';
+  var diff=Math.floor((new Date()-_startTime)/1000);
+  return Math.floor(diff/60)+'분 '+(diff%60)+'초';
+}
+
+function submitResult() {
+  // 제출 직전 최신 답변 수집
+  _discussStr =
+    '[질문1] '+(document.getElementById('q1-select').value||'-')+': '+(document.getElementById('q1-reason').value.trim().slice(0,50)||'-')+
+    ' | [질문2] '+(document.getElementById('q2-select').value||'-')+': '+(document.getElementById('q2-reason').value.trim().slice(0,50)||'-')+
+    ' | [질문3] '+(document.getElementById('q3-ans').value.trim().slice(0,50)||'-')+
+    ' | [질문4] '+(document.getElementById('q4-ans').value.trim().slice(0,50)||'-');
+  document.getElementById('res-discuss').textContent = _discussStr.slice(0,30)+'...';
+
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='⏳ 제출 중...';
+
+  // ★ 구글 폼 URL과 entry 번호를 교체해주세요
+  var FORM_URL='https://docs.google.com/forms/u/0/d/e/1FAIpQLSf8WNTTjK1kKTPT47YQ-HAiyfwz67-z4OGF1Uqy3FsJohn1Hg/formResponse';
+  var ENTRIES={
+    cls:   'entry.409768186',
+    num:   'entry.167649761',
+    name:  'entry.282256488',
+    rating:'entry.1852691433',
+    score: 'entry.403198968',
+    discuss:'entry.614377714',
+    summary:'entry.1527685552',
+    reflection:'entry.432019360',
+    time:  'entry.902918996'
+  };
+  var summaryVal = document.getElementById('criteria-summary') ? document.getElementById('criteria-summary').value.trim() : '-';
+  var reflectionVal = document.getElementById('final-reflection') ? document.getElementById('final-reflection').value.trim() : '-';
+
+  var body =
+    encodeURIComponent(ENTRIES.cls)       +'='+ encodeURIComponent(_student.cls)  +'&'+
+    encodeURIComponent(ENTRIES.num)       +'='+ encodeURIComponent(_student.num)  +'&'+
+    encodeURIComponent(ENTRIES.name)      +'='+ encodeURIComponent(_student.name) +'&'+
+    encodeURIComponent(ENTRIES.rating)    +'='+ encodeURIComponent(_ratingStr)    +'&'+
+    encodeURIComponent(ENTRIES.score)     +'='+ encodeURIComponent(_quizScore)    +'&'+
+    encodeURIComponent(ENTRIES.discuss)   +'='+ encodeURIComponent(_discussStr)   +'&'+
+    encodeURIComponent(ENTRIES.summary)   +'='+ encodeURIComponent(summaryVal)    +'&'+
+    encodeURIComponent(ENTRIES.reflection)+'='+ encodeURIComponent(reflectionVal) +'&'+
+    encodeURIComponent(ENTRIES.time)      +'='+ encodeURIComponent(_calcTime());
+
+  fetch(FORM_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
+    .then(()=>_showSubmitDone()).catch(()=>_showSubmitDone());
+}
+function _showSubmitDone(){
+  document.getElementById('submitBtn').style.display='none';
+  document.getElementById('submitDone').style.display='block';
+}
+
+/* ══ 챕터 관리 ══ */
+const TOTAL=7;
+let unlockedUpTo=0, currentChapter=0, nextAfterCongrats=1;
+const CHAPTER_TASKS={
+  0:['think'],
+  1:['A','B','C','D'],   // 카드별로 완료 처리
+  2:['q1','q2','q3','q4'],
+  3:['blank','table'],
+  4:['criteria','summary'],
+  5:['quiz'],
+  6:['final']
+};
+const completedTasks={};
+for(let i=0;i<TOTAL;i++) completedTasks[i]=new Set();
+
+function markTask(chapterIdx, taskKey){
+  completedTasks[chapterIdx].add(taskKey);
+  const el=document.getElementById('task-'+chapterIdx+'-'+taskKey);
+  if(el) el.classList.add('done');
+  checkAllTasks(chapterIdx);
+}
+function checkAllTasks(idx){
+  const req=CHAPTER_TASKS[idx]; if(!req) return;
+  const allDone=req.every(t=>completedTasks[idx].has(t));
+  const btn=document.getElementById('complete-btn-'+idx);
+  if(btn) btn.classList.toggle('btn-locked',!allDone);
+}
+function tryComplete(idx){
+  const req=CHAPTER_TASKS[idx];
+  const allDone=req?req.every(t=>completedTasks[idx].has(t)):true;
+  if(!allDone){ showToast('🔒 아직 완료하지 않은 항목이 있어요!'); return; }
+  completeChapter(idx);
+}
+function completeChapter(idx){
+  if(idx>=unlockedUpTo){unlockedUpTo=idx+1; unlockBtn(idx+1);}
+  nextAfterCongrats=idx+1;
+  if(idx+1<TOTAL) showCongrats(idx);
+  else showFinalCongrats();
+  updateProg();
+}
+function goChapter(idx){
+  if(idx>unlockedUpTo){showToast('🔒 이전 챕터를 먼저 완료해주세요!'); return;}
+  currentChapter=idx;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+idx).classList.add('active');
+  document.getElementById('ch-btn-'+idx).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateProg();
+}
+function unlockBtn(idx){
+  if(idx>=TOTAL) return;
+  const btn=document.getElementById('ch-btn-'+idx); if(!btn) return;
+  btn.classList.remove('locked');
+  btn.textContent=btn.textContent.replace('🔒 ','');
+}
+const cMsgs=[
+  ['🔍','시작 완료!','카드를 읽고 신뢰도를 평가해봐요 🃏'],
+  ['🃏','카드 평가 완료!','토의 질문에 답해봐요 🗣️'],
+  ['🗣️','토의 완료!','비교 정리를 해봐요 📊'],
+  ['📊','비교 완료!','신뢰 기준을 세워봐요 ✅'],
+  ['✅','기준 세우기 완료!','확인 문제에 도전해봐요 ✏️'],
+  ['✏️','확인 문제 완료!','마무리해봐요 🎯'],
+];
+function showCongrats(idx){
+  const m=cMsgs[idx]||['🎉','완료!','수고했어요!'];
+  document.getElementById('congratsEmoji').textContent=m[0];
+  document.getElementById('congratsTitle').textContent=m[1];
+  document.getElementById('congratsMsg').textContent=m[2];
+  document.getElementById('congratsOverlay').classList.add('show');
+}
+function showFinalCongrats(){
+  document.getElementById('congratsEmoji').textContent='🏆';
+  document.getElementById('congratsTitle').textContent='1단계 완료!';
+  document.getElementById('congratsMsg').textContent='정보 리터러시 1단계 마스터! 🔍✨';
+  document.getElementById('congratsOverlay').classList.add('show');
+}
+function closeCongratsAndNext(){
+  document.getElementById('congratsOverlay').classList.remove('show');
+  if(nextAfterCongrats<TOTAL) goChapter(nextAfterCongrats);
+}
+function updateProg(){
+  const pct=Math.round((unlockedUpTo/TOTAL)*100);
+  document.getElementById('pFill').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+}
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('lockToast');
+  t.textContent=msg; t.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function toggleEl(id){
+  const e=document.getElementById(id);
+  e.style.display=e.style.display==='none'?'block':'none';
+}
+
+/* ══ 카드별 순서 진행 관리 ══ */
+const ratings={A:0,B:0,C:0,D:0};
+const notesDone={A:false,B:false,C:false,D:false};
+
+// 단계 표시기 업데이트
+function updateStepIndicator(current, doneList){
+  const cards=['A','B','C','D'];
+  cards.forEach((c,i)=>{
+    const dot=document.getElementById('dot-'+c);
+    if(!dot) return;
+    dot.classList.remove('current','done');
+    if(doneList.includes(c)) dot.classList.add('done');
+    else if(c===current) dot.classList.add('current');
+  });
+  ['AB','BC','CD'].forEach(pair=>{
+    const con=document.getElementById('con-'+pair);
+    if(!con) return;
+    con.classList.toggle('done', doneList.includes(pair[0])&&doneList.includes(pair[1]));
+  });
+  const labels={A:'카드 A 읽고 신뢰도 평가하기',B:'카드 B 읽고 신뢰도 평가하기',C:'카드 C 읽고 신뢰도 평가하기',D:'카드 D 읽고 신뢰도 평가하기'};
+  const lbl=document.getElementById('step-label');
+  if(lbl && labels[current]) lbl.textContent=labels[current];
+}
+
+function rateSrc(id, score){
+  ratings[id]=score;
+  const stars=document.getElementById('stars-'+id).querySelectorAll('.star-big');
+  stars.forEach((s,i)=>s.classList.toggle('active',i<score));
+  const scoreTexts=['','😕 1점 — 전혀 믿기 어려워요','😟 2점 — 믿기 어려워요','😐 3점 — 보통이에요','😊 4점 — 믿을 수 있어요','🌟 5점 — 매우 신뢰할 수 있어요'];
+  const rr=document.getElementById('rating-result-'+id);
+  if(rr) rr.textContent=scoreTexts[score]||'';
+  _updateRatingStr();
+  _tryEnableNextBtn(id);
+}
+
+function _updateRatingStr(){
+  _ratingStr='A:'+ratings.A+'점 B:'+ratings.B+'점 C:'+ratings.C+'점 D:'+ratings.D+'점';
+  document.getElementById('res-rating').textContent=_ratingStr;
+}
+
+function _tryEnableNextBtn(id){
+  const hasRating = ratings[id]>0;
+  const hasNote   = notesDone[id];
+  const btn=document.getElementById('btn-next-'+id);
+  const hint=document.getElementById('hint-next-'+id);
+  if(btn){
+    if(hasRating&&hasNote){
+      btn.style.opacity='1'; btn.style.cursor='pointer';
+      if(hint) hint.style.display='none';
+    } else {
+      btn.style.opacity='.5'; btn.style.cursor='not-allowed';
+      if(hint) hint.style.display='block';
+    }
+  }
+}
+
+function checkNoteA(){
+  const v=document.getElementById('note-A').value.trim();
+  notesDone.A=v.length>=5;
+  _tryEnableNextBtn('A');
+}
+function checkNoteB(){
+  const v=document.getElementById('note-B').value.trim();
+  notesDone.B=v.length>=5;
+  _tryEnableNextBtn('B');
+}
+function checkNoteC(){
+  const v=document.getElementById('note-C').value.trim();
+  notesDone.C=v.length>=5;
+  _tryEnableNextBtn('C');
+}
+function checkNoteD(){
+  const v=document.getElementById('note-D').value.trim();
+  notesDone.D=v.length>=5;
+  _tryEnableNextBtn('D');
+}
+
+// 완료 체크 & 다음 카드 이동
+const doneSections=[];
+
+function goNextCard(nextId){
+  const prevId = {B:'A',C:'B',D:'C'}[nextId];
+  if(!prevId) return;
+  if(ratings[prevId]===0){ showToast('⭐ 별점을 먼저 매겨주세요!'); return; }
+  if(!notesDone[prevId]){ showToast('📝 메모를 더 자세히 써봐요! (5글자 이상)'); return; }
+
+  // 이전 카드 완료 처리
+  doneSections.push(prevId);
+  markTask(1, prevId);
+
+  // 이전 카드 섹션 숨기기
+  const prevSec=document.getElementById('section-card'+prevId);
+  if(prevSec){
+    prevSec.style.opacity='0.5';
+    prevSec.style.pointerEvents='none';
+    const doneLabel=document.createElement('div');
+    doneLabel.innerHTML='<div style="text-align:center;padding:8px;background:#ecfdf5;border-radius:10px;color:#059669;font-weight:bold;margin-bottom:10px;">✅ 카드 '+prevId+' 완료!</div>';
+    prevSec.insertBefore(doneLabel, prevSec.firstChild);
+  }
+
+  // 다음 카드 섹션 표시
+  const nextSec=document.getElementById('section-card'+nextId);
+  if(nextSec){
+    nextSec.style.display='block';
+    nextSec.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // 단계 표시기 업데이트
+  updateStepIndicator(nextId, doneSections.slice());
+}
+
+function completeCardSection(){
+  // 카드 D 완료 처리
+  if(ratings.D===0){ showToast('⭐ 카드 D 별점을 먼저 매겨주세요!'); return; }
+  if(!notesDone.D){ showToast('📝 카드 D 메모를 더 자세히 써봐요!'); return; }
+  doneSections.push('D');
+  markTask(1,'D');
+
+  // 모든 단계 완료 표시
+  updateStepIndicator('', ['A','B','C','D']);
+  const lbl=document.getElementById('step-label');
+  if(lbl) lbl.textContent='✅ 4개 카드 모두 완료!';
+
+  // 챕터 1 완료
+  completeChapter(1);
+}
+
+/* ══ 토의 질문 ══ */
+function checkDiscuss(){
+  const q1s=document.getElementById('q1-select').value;
+  const q1r=document.getElementById('q1-reason').value.trim();
+  const q2s=document.getElementById('q2-select').value;
+  const q2r=document.getElementById('q2-reason').value.trim();
+  const q3=document.getElementById('q3-ans').value.trim();
+  const q4=document.getElementById('q4-ans').value.trim();
+  if(q1s&&q1r.length>=5) markTask(2,'q1');
+  if(q2s&&q2r.length>=5) markTask(2,'q2');
+  if(q3.length>=10) markTask(2,'q3');
+  if(q4.length>=10) markTask(2,'q4');
+}
+
+/* ══ 빈칸 채우기 ══ */
+function checkBlanks3(){
+  const checks=[
+    {id:'bl1',ans:['개인','일반인','전문가가 아']},
+    {id:'bl2',ans:['없다','없음']},
+    {id:'bl3',ans:['공공기관','정부','기관']},
+    {id:'bl4',ans:['있다','있음']},
+    {id:'bl5',ans:['출처','근거']},
+    {id:'bl6',ans:['전문의','의사','전문가']},
+  ];
+  let ok=0;
+  checks.forEach(c=>{
+    const el=document.getElementById(c.id);
+    const val=el.value.trim();
+    const correct=c.ans.some(a=>val.includes(a)||a.includes(val)&&val.length>0);
+    el.className='blank '+(correct?'ok':'err');
+    if(correct) ok++;
+  });
+  const r=document.getElementById('result3');
+  r.className='result-box show '+(ok>=5?'good':'info');
+  document.getElementById('result3-score').textContent=ok+'/6 정답! '+(ok===6?'🎉':'💪');
+  document.getElementById('result3-msg').textContent=ok>=5?'훌륭해요! 출처 카드의 차이를 잘 이해했어요!':'위 카드를 다시 보며 도전해봐요!';
+  if(ok>=4) markTask(3,'blank');
+}
+function resetBlanks3(){
+  ['bl1','bl2','bl3','bl4','bl5','bl6'].forEach(id=>{
+    const el=document.getElementById(id); el.value=''; el.className='blank';
+  });
+  document.getElementById('result3').className='result-box';
+}
+
+/* ══ 기준 세우기 ══ */
+const selectedCriteria=new Set();
+function toggleCriteria(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('checked');
+  if(el.classList.contains('checked')) selectedCriteria.add(id);
+  else selectedCriteria.delete(id);
+  if(selectedCriteria.size>=4) markTask(4,'criteria');
+}
+function checkCriteria(){
+  const fb=document.getElementById('criteria-fb');
+  if(selectedCriteria.has('cr-7')){
+    fb.style.display='block';
+    fb.className='hl hl-amber';
+    fb.innerHTML='💛 <strong>구독자·조회수</strong>는 신뢰도의 기준이 아니에요! 다시 생각해볼까요? 카드 C를 떠올려봐요.';
+  } else if(selectedCriteria.size>=4){
+    fb.style.display='block';
+    fb.className='hl hl-green';
+    fb.innerHTML='✅ 훌륭해요! 좋은 기준들을 골랐어요!';
+  } else {
+    fb.style.display='block';
+    fb.className='hl hl-red';
+    fb.innerHTML='⚠️ 최소 4개 이상 선택해야 해요!';
+  }
+}
+function checkCriteriaSummary(){
+  const v=document.getElementById('criteria-summary').value.trim();
+  if(v.length>=15&&selectedCriteria.size>=4) markTask(4,'summary');
+}
+
+/* ══ 확인 문제 ══ */
+const QUESTIONS5=[
+  {q:'다음 중 신뢰하기 가장 어려운 출처는?',opts:['① 질병관리청 국가건강정보포털','② 서울아산병원 전문의 감수 자료','③ 구독자 100만명 유튜브 채널 (출처 없음)','④ 대한의학회 공식 가이드라인'],ans:2,exp:'구독자 수는 정보 정확성과 무관해요! 출처와 전문가 검토 여부가 더 중요합니다 🔍'},
+  {q:'"~한 것 같아요", "어디서 봤는데"처럼 불확실한 표현이 많은 글을 신뢰하기 어려운 이유는?',opts:['① 글이 너무 짧아서','② 작성자 자신도 확신하지 못하고 근거가 없어서','③ 이모지를 많이 사용해서','④ 댓글이 많이 달려있어서'],ans:1,exp:'불확실한 표현은 작성자 자신도 확신하지 못한다는 의미예요 🔍'},
+  {q:'신뢰할 수 있는 출처의 조건으로 옳지 않은 것은?',opts:['① 전문가(기관)가 작성했다','② 통계나 연구 결과가 제시되어 있다','③ 유튜브 조회수가 100만 이상이다','④ 최근에 업데이트된 정보다'],ans:2,exp:'조회수는 신뢰도와 관계없어요! 조회수 높아도 잘못된 정보일 수 있어요 🔍'},
+  {q:'카드 B(질병관리청)가 카드 A(블로그)보다 신뢰할 수 있는 이유로 옳은 것은?',opts:['① 글이 더 길기 때문에','② 이미지가 더 많기 때문에','③ 전문가 검토와 통계 근거가 있기 때문에','④ 더 오래된 정보이기 때문에'],ans:2,exp:'전문가 검토와 근거 있는 통계가 신뢰의 핵심이에요 🔍'},
+];
+let curQ5=0,results5=[],answered5=false,inited5=false;
+function initQuiz5(){if(inited5)return;inited5=true;renderQuiz5();}
+function renderQuiz5(){
+  if(curQ5>=QUESTIONS5.length){showResult5();return;}
+  const q=QUESTIONS5[curQ5]; answered5=false;
+  document.getElementById('quizArea5').innerHTML=`
+    <div style="background:#f0f9ff;border-radius:16px;padding:20px;border:1.5px solid #bae6fd;margin-bottom:14px;">
+      <div style="font-size:.82em;color:#60a5fa;margin-bottom:8px;">문제 ${curQ5+1} / ${QUESTIONS5.length} 🔍</div>
+      <div style="font-size:1em;line-height:1.7;margin-bottom:14px;">${q.q}</div>
+      <div id="opts5">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQ5(${i})">${o}</button>`).join('')}</div>
+    </div>
+    <div class="exp-box" id="exp5"><div id="exp5t" style="margin-bottom:6px;"></div><div id="exp5b" style="line-height:1.85;font-size:.93em;"></div></div>
+    <div id="next5" style="text-align:center;margin-top:12px;display:none;">
+      <button class="btn btn-blue" onclick="nextQ5()">${curQ5+1<QUESTIONS5.length?'다음 문제 →':'결과 보기 🎉'}</button>
+    </div>`;
+}
+function answerQ5(idx){
+  if(answered5)return; answered5=true;
+  const q=QUESTIONS5[curQ5], ok=idx===q.ans;
+  results5.push(ok);
+  document.querySelectorAll('#opts5 .quiz-opt').forEach((o,i)=>{
+    o.disabled=true; o.style.cursor='default';
+    if(i===q.ans) o.classList.add('right');
+    else if(i===idx&&!ok) o.classList.add('wrong');
+  });
+  const box=document.getElementById('exp5');
+  box.className='exp-box show '+(ok?'ok':'ng');
+  document.getElementById('exp5t').textContent=ok?'✅ 정답이에요! 🎉':'❌ 아쉬워요!';
+  document.getElementById('exp5b').innerHTML=q.exp;
+  document.getElementById('next5').style.display='block';
+}
+function nextQ5(){curQ5++;renderQuiz5();}
+function showResult5(){
+  const c=results5.filter(Boolean).length,t=QUESTIONS5.length;
+  const pct=Math.round(c/t*100);
+  _quizScore=c+'/'+t+' ('+pct+'%)';
+  document.getElementById('res-score').textContent=_quizScore;
+  document.getElementById('quizArea5').innerHTML=`
+    <div style="text-align:center;padding:24px 0;">
+      <div style="font-size:3em;margin-bottom:12px;">${pct===100?'🏆':pct>=75?'🌟':'💪'}</div>
+      <div style="font-size:1.8em;color:#0369a1;margin-bottom:8px;">${c} / ${t} 정답!</div>
+      <div style="color:var(--muted);margin-bottom:18px;">${pct>=75?'정보 리터러시 실력이 늘었어요! 🔍':'한 번 더 복습해봐요! 💪'}</div>
+      <button class="btn btn-ghost" onclick="restartQ5()">🔄 다시 풀기</button>
+    </div>`;
+  markTask(5,'quiz');
+}
+function restartQ5(){curQ5=0;results5=[];answered5=false;inited5=false;initQuiz5();}
+
+/* ══ 마무리 ══ */
+function checkFinal(){
+  const v=document.getElementById('final-reflection').value.trim();
+  if(v.length>=15){
+    markTask(6,'final');
+  }
+}
+function saveFinal(){
+  checkFinal();
+  const v=document.getElementById('final-reflection').value.trim();
+  if(v.length>=15){
+    document.getElementById('final-done').style.display='block';
+    completeChapter(6);
+  } else {
+    showToast('💭 조금 더 자세히 써봐요!');
+  }
+}
+
+
+							</script>
+                        </body>
+                        </html>
+                    
